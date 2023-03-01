@@ -10,13 +10,14 @@
   subBatch = 1,
   zero_include = FALSE,
   breaks = 40,
-  main = "histogram of x",
+  title = "histogram of x",
   boundary = NULL,
   hist = TRUE,
   dens = TRUE,
   tabl = FALSE,
   col = "forestgreen",
   p = NULL,
+  print = TRUE,
   ...
 )
 }
@@ -31,7 +32,7 @@
 
 \item{breaks}{number of breaks for histogram}
 
-\item{main}{Title of plot.}
+\item{title}{Title of plot.}
 
 \item{boundary}{Vertical line drawn on plot to indicate boundary constraint.}
 
@@ -44,6 +45,8 @@
 \item{col}{Color of density.}
 
 \item{p}{ggplot object to add layers too. If hist=FALSE this must be specified.}
+
+\item{print}{logical whether to print the plot.}
 
 \item{...}{Arguments passed to cfGMM function}
 }

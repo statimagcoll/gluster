@@ -19,7 +19,8 @@ get.mode <- function(par.mat){
 #' @param tabl Logical indicating whether to add table of parameter values.
 #' @param col Color of density.
 #' @param p ggplot object to add layers too. If hist=FALSE this must be specified.
-#' @param main Title of plot.
+#' @param print logical whether to print the plot.
+#' @param title Title of plot.
 #' @param ... Arguments passed to cfGMM function
 #' @importFrom stats dgamma
 #' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
@@ -31,19 +32,20 @@ get.mode <- function(par.mat){
 #' @export
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40, main="histogram of x", boundary=NULL, hist=TRUE, dens=TRUE, tabl=FALSE, col='forestgreen', p=NULL, ...){
+plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40, title="histogram of x", boundary=NULL, hist=TRUE, dens=TRUE, tabl=FALSE, col='forestgreen', p=NULL, print=TRUE, ...){
   if(is.numeric(marker)){ marker=colnames(x[["expressionX"]])[marker] }
+  if(is.numeric(subBatch) & !is.null(names(x$params[[marker]]))[1]){ subBatch = names(x$params[[marker]])[subBatch] }
   p.range <- c(0, max(x[["expressionX"]][[marker]], na.rm=TRUE))
   xs <- seq(0, p.range[2], length.out=100)
   pars <- x$params[[marker]][[subBatch]]
 
   fun1 <- function(xs){pars[1,2] * dgamma(xs, shape=pars[2,2],scale=pars[3,2])}
   fun2 <- function(xs){pars[1,3]  * dgamma(xs, shape=pars[2,3],scale=pars[3,3])}
-  plot.x <- na.omit(x[["expressionX"]][marker])
+  plot.x <- na.omit(x[["expressionX"]][marker][ which(as.character(x[["subBatch"]])==as.character(subBatch)), ,drop=FALSE ])
 
   if(hist){
     p <- ggplot2::ggplot(plot.x, ggplot2::aes(UQ(as.name(marker)) ) ) +
-      ggplot2::ylab("")+hrbrthemes::theme_ipsum()+ggplot2::ggtitle(main)+
+      ggplot2::ylab("")+hrbrthemes::theme_ipsum()+ggplot2::ggtitle(title)+
       ggplot2::geom_histogram(ggplot2::aes(y=after_stat(density)),bins = breaks, alpha=0.2)
   }
   if(dens){
@@ -65,7 +67,7 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
     # Patchwork magic
     p <- p + p3 + plot_layout(ncol = 2)
   }
-  print(p)
+  if(print) print(p) else p
 }
 
 
@@ -87,8 +89,8 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
 hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.table=FALSE, ...){
-  p <- plot.gluster(x=fit1, marker=marker, subBatch=subBatch, main=title, ...)
-  p <- plot.gluster(x=fit2, marker=marker, subBatch=subBatch, main=title, hist=FALSE, dens=TRUE, tabl=FALSE, p=p, col='red', ...)
+  p <- plot.gluster(x=fit1, marker=marker, subBatch=subBatch, title=title, print=FALSE, ...)
+  p <- plot.gluster(x=fit2, marker=marker, subBatch=subBatch, title=title, hist=FALSE, dens=TRUE, tabl=FALSE, p=p, col='red', print=FALSE, ...)
 
   pars = fit2$params[[marker]][[subBatch]]
   # p <- p + ggplot2::stat_function(fun = fun1, n = 101, alpha=0.3, color="red", xlim=p.range) +

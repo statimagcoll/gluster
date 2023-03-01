@@ -14,17 +14,25 @@
 #' @export
 #' @details Fits cfGMM models to each marker channel in a matrix of marker channels for one slide
 gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NULL, subBatch=NULL, ...){
+  if(is.null(subBatch)) subBatch = rep(1, nrow(expressionMarkers))
   expressionMarkers = as.data.frame(expressionMarkers)
   # There could be better checks here
   if(!is.null(qboundaryMarkers)){
     newBoundaryMarkers =  mapply(function(expressionMarker, quantileMat, boundaryMat){
       # computes quantiles from qboundaryMarkers
-      matrix(quantile(expressionMarker, quantileMat, na.rm=TRUE), nrow=nrow(quantileMat), ncol=ncol(quantileMat))
+      if(!is.null(quantileMat)){
+        matrix(quantile(expressionMarker, quantileMat, na.rm=TRUE), nrow=nrow(quantileMat), ncol=ncol(quantileMat))
+      } else {
+        matrix(c(-Inf, -Inf, Inf, Inf), nrow=2, ncol=2)
+      }
     },
     expressionMarker=expressionMarkers, quantileMat=qboundaryMarkers, SIMPLIFY = FALSE)
     if(!is.null(boundaryMarkers)){
       boundaryMarkers = mapply(function(newBoundaryMat, boundaryMat){
         # chooses most conservative combination of two boundary options
+        if(is.null(boundaryMat)){
+          boundaryMat = matrix(c(-Inf, -Inf, Inf, Inf), nrow=2, ncol=2)
+        }
         cbind(pmax(newBoundaryMat[,1], boundaryMat[,1]), pmin(newBoundaryMat[,2], boundaryMat[,2]) )
       }, newBoundaryMat=newBoundaryMarkers, boundaryMat=boundaryMarkers, SIMPLIFY = FALSE)
     } else {
@@ -32,9 +40,10 @@ gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NU
     }
   }
   # run models
+  if(is.null(boundaryMarkers)){ boundaryMarkers = rep(list(boundaryMarkers), ncol(expressionMarkers)) }
   result = mapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, ...=...))
   result = list(expressionZ = as.data.frame(do.call(cbind, result[3,])), expressionX=as.data.frame(do.call(cbind, result[4,])),
-                params = result[2,], fit=result[1,])
+                params = result[2,], fit=result[1,], subBatch=subBatch)
   class(result) = c('gluster', class(result))
   return(result)
 }

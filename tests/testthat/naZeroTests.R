@@ -1,4 +1,4 @@
-#devtools::load_all()
+devtools::load_all()
 x = rgamma(1000, shape=1)
 x[1:10 ] = NA
 x[ 30:40] = 0
@@ -29,5 +29,5 @@ test = gluster(expressionMarkers = expMat,
                qboundaryMarkers = rep(list(matrix(c(0, 0.25, 0.5, 1), byrow = TRUE, nrow=2)), 2) )
 
 plot.gluster(test)
-debug(hist_sr_constrast)#; debug(plot.gluster)
+#debug(hist_sr_constrast)#; debug(plot.gluster)
 hist_sr_constrast(test, test, add.table=TRUE)
