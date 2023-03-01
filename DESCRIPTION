@@ -1,0 +1,26 @@
+Package: gluster
+Type: Package
+Title: Gamma Mixture Models for Multiplexed Immunofluorescence Imaging Data
+Version: 0.1.0
+Author: c(person("Jiangmei", "Xiong", email="simon.vandekar@vanderbilt.edu", role=c('aut', 'cre')),
+              person("Simon", "Vandekar", email="simon.vandekar@vanderbilt.edu", role=c('aut')) )
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description:  Tools for using closed-form gamma mixture models for fitting cell expression distributions for mIF data.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.3)
+Collate:
+    'gluster.R'
+    'histograms.R'
+    'monoZ.R'
+Imports:
+  cfGMM,
+  hrbrthemes,
+  ggplot2,
+  gridExtra,
+  patchwork,
+  rlang
+RoxygenNote: 7.2.3
+Suggests: 
+Remotes: jiangmeirubyxiong/cfGMM
