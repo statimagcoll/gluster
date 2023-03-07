@@ -14,13 +14,15 @@ Collate:
     'gluster.R'
     'histograms.R'
     'monoZ.R'
+    'groupGluster.R'
 Imports:
   cfGMM,
   hrbrthemes,
   ggplot2,
   gridExtra,
   patchwork,
-  rlang
+  rlang,
+  parallel
 RoxygenNote: 7.2.3
 Suggests: 
     knitr,
