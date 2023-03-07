@@ -15,7 +15,7 @@
 #' @importFrom reactable reactable
 #' @importFrom parallel mclapply detectCores
 #' @export
-#' @details Fits cfGMM models to each marker channel in a matrix of marker channels for one slide
+#' @details Fits cfGMM models to each marker channel in a matrix of marker channels for multiple slides
 groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qboundaryMarkers=NULL, subBatch=NULL, n.cores=NULL, ...){
   if(is.null(n.cores)){n.cores = detectCores()-1}
   if(any(is.na(slide))){expressionMarkers = expressionMarkers[!is.na(slide)]; slide = slide[!is.na(slide)]}
