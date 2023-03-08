@@ -83,6 +83,6 @@ We can use mclapply from the parallel package to run gluster on multiple slides.
 library(parallel)
 library(reactable)
 constrCfGMMbunch = mclapply(cells[1:5], function(x) gluster(x[,nzNormedMarkers], boundaryMarkers = boundaries, qboundaryMarkers=quantileBoundaries),  mc.cores = 5)
-trash = sapply(names(constrCfGMMbunch), function(x) plot.gluster(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(constrGMMfit$expressionX[,1], probs=quantileBoundaries[[1]][2,1]), title = x ) )
+trash = sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(constrGMMfit$expressionX[,1], probs=quantileBoundaries[[1]][2,1]), title = x ) )
 reactable(sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence})))
 ```
