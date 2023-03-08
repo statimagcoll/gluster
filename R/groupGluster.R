@@ -9,6 +9,7 @@
 #' @param subBatch If there are multiple subBatch on a slide, subBatch can be used to return probability estimates independently for each region.
 #' @param boundaryMarkers A nmarker list of 4x4 matrices giving the boundaries for the modes of the unexpressed and expressed cell distributions.
 #' @param qboundaryMarkers A nmarker list of 4x4 matrices giving the qauntile boundaries for the modes for the unexpressed and expressed cell distributions.
+#' @param n.cores Number of cores. Default to one less than the number of cores available on the machine.
 #' @param ... Arguments passed to cfGMM function
 #' @importFrom cfGMM cfGMM
 #' @importFrom stats quantile
@@ -20,8 +21,8 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
   if(is.null(n.cores)){n.cores = detectCores()-1}
   if(any(is.na(slide))){expressionMarkers = expressionMarkers[!is.na(slide)]; slide = slide[!is.na(slide)]}
   cells = split(expressionMarkers, slide)
-  constrCfGMMbunch = mclapply(expressionMarkers, function(x) gluster(x[,nzNormedMarkers], boundaryMarkers, qboundaryMarkers, subBatch),   mc.cores = n.cores)
-  trash = sapply(names(constrCfGMMbunch), function(x) plot.gluster(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(constrGMMfit$expressionX[,1], probs=quantileBoundaries[[1]][2,1]), title = x ) )
+  constrCfGMMbunch = mclapply(expressionMarkers, function(x) gluster(x, boundaryMarkers, qboundaryMarkers, subBatch),   mc.cores = n.cores)
+  trash = sapply(names(constrCfGMMbunch), function(x) plot.gluster(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(expressionMarkers, probs=qboundaryMarkers[[1]][2,1]), title = x ) )
   reactable(sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence})))
   class(constrCfGMMbunch) = c('groupGluster', class(constrCfGMMbunch))
   return(constrCfGMMbunch)

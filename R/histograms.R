@@ -1,10 +1,3 @@
-get.mode <- function(par.mat){
-  modes <- c(NA, (par.mat[2,2]-1)*par.mat[3,2], (par.mat[2,3]-1)*par.mat[3,3])
-  par.mat <- rbind(par.mat, modes)
-  return(par.mat)
-}
-
-
 #' Fits a gamma mixture model to aid clustering of mIF imaging data
 #'
 #'
@@ -102,4 +95,19 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.
   }
   print(p)
 }
+
+
+#' Fits a gamma mixture model to aid clustering of mIF imaging data
+#'
+#'
+#' @param par.mat 2x2 parameter matrix
+#' @import patchwork
+#' @details Internal Function
+#' Calculate mode from parameter matrix
+get.mode <- function(par.mat){
+  modes <- c(NA, (par.mat[2,2]-1)*par.mat[3,2], (par.mat[2,3]-1)*par.mat[3,3])
+  par.mat <- rbind(par.mat, modes)
+  return(par.mat)
+}
+
 

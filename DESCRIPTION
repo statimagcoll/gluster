@@ -22,7 +22,8 @@ Imports:
   gridExtra,
   patchwork,
   rlang,
-  parallel
+  parallel,
+  reactable
 RoxygenNote: 7.2.3
 Suggests: 
     knitr,
