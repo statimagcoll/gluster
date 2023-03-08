@@ -10,6 +10,8 @@ devtools::install_github( "statimagcoll/gluster" )
 
 ## Loading mIF data from `VectraPolarisData`
 
+Install instructions can be found at https://github.com/julia-wrobel/VectraPolarisData
+
 ```{r, message=FALSE}
 library(VectraPolarisData)
 spe_lung <- HumanLungCancerV3()
