@@ -20,10 +20,8 @@
 groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qboundaryMarkers=NULL, subBatch=NULL, n.cores=NULL, ...){
   if(is.null(n.cores)){n.cores = detectCores()-1}
   if(any(is.na(slide))){expressionMarkers = expressionMarkers[!is.na(slide)]; slide = slide[!is.na(slide)]}
-  cells = split(expressionMarkers, slide)
+  expressionMarkers = split(expressionMarkers, slide)
   constrCfGMMbunch = mclapply(expressionMarkers, function(x) gluster(x, boundaryMarkers, qboundaryMarkers, subBatch),   mc.cores = n.cores)
-  trash = sapply(names(constrCfGMMbunch), function(x) plot.gluster(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(expressionMarkers, probs=qboundaryMarkers[[1]][2,1]), title = x ) )
-  reactable(sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence})))
   class(constrCfGMMbunch) = c('groupGluster', class(constrCfGMMbunch))
   return(constrCfGMMbunch)
 }
