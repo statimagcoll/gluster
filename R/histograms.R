@@ -26,41 +26,48 @@
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
 plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40, title="histogram of x", boundary=NULL, hist=TRUE, dens=TRUE, tabl=FALSE, col='forestgreen', p=NULL, print=TRUE, ...){
-  if(is.numeric(marker)){ marker=colnames(x[["expressionX"]])[marker] }
-  if(is.numeric(subBatch) & !is.null(names(x$params[[marker]]))[1]){ subBatch = names(x$params[[marker]])[subBatch] }
-  p.range <- c(0, max(x[["expressionX"]][[marker]], na.rm=TRUE))
-  xs <- seq(0, p.range[2], length.out=100)
-  pars <- x$params[[marker]][[subBatch]]
+  if(!all(is.na(x[["expressionX"]][[marker]]))){
+    if(is.numeric(marker)){ marker=colnames(x[["expressionX"]])[marker] }
+    if(is.numeric(subBatch) & !is.null(names(x$params[[marker]]))[1]){ subBatch = names(x$params[[marker]])[subBatch] }
+    expr = x[["expressionX"]][[marker]]
+    pars <- x$params[[marker]][[subBatch]]
+    if(!zero_include){
+      expr = expr[expr>0]
+      pars[1,2:3] = pars[1, 2:3]/(1-pars[1,1])
+    }
+    p.range <- c(0, max(expr, na.rm=TRUE))
+    xs <- seq(0, p.range[2], length.out=100)
 
-  fun1 <- function(xs){pars[1,2] * dgamma(xs, shape=pars[2,2],scale=pars[3,2])}
-  fun2 <- function(xs){pars[1,3]  * dgamma(xs, shape=pars[2,3],scale=pars[3,3])}
-  plot.x <- na.omit(x[["expressionX"]][marker][ which(as.character(x[["subBatch"]])==as.character(subBatch)), ,drop=FALSE ])
+    fun1 <- function(xs){pars[1,2] * dgamma(xs, shape=pars[2,2],scale=pars[3,2])}
+    fun2 <- function(xs){pars[1,3]  * dgamma(xs, shape=pars[2,3],scale=pars[3,3])}
+    plot.x <- na.omit(x[["expressionX"]][marker][ which(as.character(x[["subBatch"]])==as.character(subBatch)), ,drop=FALSE ])
 
-  if(hist){
-    p <- ggplot2::ggplot(plot.x, ggplot2::aes(UQ(as.name(marker)) ) ) +
-      ggplot2::ylab("")+hrbrthemes::theme_ipsum()+ggplot2::ggtitle(title)+
-      ggplot2::geom_histogram(ggplot2::aes(y=after_stat(density)),bins = breaks, alpha=0.2)
+    if(hist){
+      p <- ggplot2::ggplot(plot.x, ggplot2::aes(UQ(as.name(marker)) ) ) +
+        ggplot2::ylab("")+hrbrthemes::theme_ipsum()+ggplot2::ggtitle(title)+
+        ggplot2::geom_histogram(ggplot2::aes(y=after_stat(density)),bins = breaks, alpha=0.2)
+    }
+    if(dens){
+      p<- p +
+        ggplot2::stat_function(fun = fun1, n = 101, alpha=0.3, color=col, xlim = p.range) +
+        ggplot2::stat_function(fun = fun2, n = 101, alpha=0.3, color=col, xlim=p.range)
+    }
+    if(!is.null(boundary)){
+      p <- p + ggplot2::geom_vline(xintercept=boundary, linetype="dashed", color = col)
+    }
+    if(tabl){
+      p2 <- gridExtra::tableGrob(round(as.data.frame(pars),3))
+      # Set widths/heights to 'fill whatever space I have'
+      p2$widths <- unit(rep(1, ncol(p2)), "null")
+      p2$heights <- unit(rep(1, nrow(p2)), "null")
+      # Format table as plot
+      p3 <- ggplot() +
+        annotation_custom(p2)
+      # Patchwork magic
+      p <- p + p3 + plot_layout(ncol = 2)
+    }
+    if(print) print(p) else p
   }
-  if(dens){
-     p<- p +
-      ggplot2::stat_function(fun = fun1, n = 101, alpha=0.3, color=col, xlim = p.range) +
-      ggplot2::stat_function(fun = fun2, n = 101, alpha=0.3, color=col, xlim=p.range)
-  }
-  if(!is.null(boundary)){
-    p <- p + ggplot2::geom_vline(xintercept=boundary, linetype="dashed", color = col)
-  }
-  if(tabl){
-    p2 <- gridExtra::tableGrob(round(as.data.frame(pars),3))
-    # Set widths/heights to 'fill whatever space I have'
-    p2$widths <- unit(rep(1, ncol(p2)), "null")
-    p2$heights <- unit(rep(1, nrow(p2)), "null")
-    # Format table as plot
-    p3 <- ggplot() +
-      annotation_custom(p2)
-    # Patchwork magic
-    p <- p + p3 + plot_layout(ncol = 2)
-  }
-  if(print) print(p) else p
 }
 
 
