@@ -29,10 +29,11 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
   if(!all(is.na(x[["expressionX"]][[marker]]))){
     if(is.numeric(marker)){ marker=colnames(x[["expressionX"]])[marker] }
     if(is.numeric(subBatch) & !is.null(names(x$params[[marker]]))[1]){ subBatch = names(x$params[[marker]])[subBatch] }
-    expr = x[["expressionX"]][[marker]]
+    expr = x[["expressionX"]][marker]
     pars <- x$params[[marker]][[subBatch]]
     if(!zero_include){
-      expr = expr[expr>0]
+      x[["subBatch"]] = x[["subBatch"]][expr[,marker]>0]
+      expr = expr[expr>0, , drop=FALSE]
       pars[1,2:3] = pars[1, 2:3]/(1-pars[1,1])
     }
     p.range <- c(0, max(expr, na.rm=TRUE))
@@ -40,7 +41,7 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
 
     fun1 <- function(xs){pars[1,2] * dgamma(xs, shape=pars[2,2],scale=pars[3,2])}
     fun2 <- function(xs){pars[1,3]  * dgamma(xs, shape=pars[2,3],scale=pars[3,3])}
-    plot.x <- na.omit(x[["expressionX"]][marker][ which(as.character(x[["subBatch"]])==as.character(subBatch)), ,drop=FALSE ])
+    plot.x <- na.omit(expr[ which(as.character(x[["subBatch"]])==as.character(subBatch)), ,drop=FALSE ])
 
     if(hist){
       p <- ggplot2::ggplot(plot.x, ggplot2::aes(UQ(as.name(marker)) ) ) +
