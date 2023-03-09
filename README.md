@@ -88,3 +88,9 @@ constrCfGMMbunch = mclapply(cells[1:5], function(x) gluster(x[,nzNormedMarkers],
 trash = sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(constrGMMfit$expressionX[,1], probs=quantileBoundaries[[1]][2,1]), title = x ) )
 reactable(sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence})))
 ```
+Alternatively, use groupGluster:
+
+```{r groupGluster}
+constrCfGMMbunch <- groupGluster(cells[,nzNormedMarkers], slide = cells$slide_id,
+                                 boundaryMarkers = boundaries,qboundaryMarkers=quantileBoundaries, n.cores = 5)
+```
