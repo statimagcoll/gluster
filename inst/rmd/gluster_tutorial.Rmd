@@ -25,7 +25,9 @@ cell = cbind(as.data.frame(colData(spe_lung)), as.data.frame(spatialCoords(spe_l
 
 ## Running gluster on a single slide
 
-```{r}
+Before fitting the model, we apply a basic normalization and set some boundary constraints. If constraints aren't known, we can set all the constraints to `NULL`.
+
+```{r, setup}
 library(gluster)
 #devtools::install_github('statimagcoll/gluster')
 allMarkers = grep('^entire_cell_.*total$', names(cell), value=TRUE)
@@ -33,8 +35,6 @@ allMarkers = grep('^entire_cell_.*total$', names(cell), value=TRUE)
 nzNormedMarkers = paste0('nzNorm_',allMarkers)
 cell = do.call(rbind, lapply(split(cell, cell$slide_id), function(df){df[,nzNormedMarkers] = log10(1+sweep(df[,allMarkers], 2, colMeans(replace(df[,allMarkers], df[,allMarkers]==0, NA), na.rm = TRUE ), FUN = '/' ) ); df }) )
 
-# split the data frame
-cells = split(cell, cell$slide_id)
 
 quantileBoundaries = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
@@ -53,17 +53,23 @@ boundaries = list(matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
                   matrix(c(0,.4, .45, Inf), byrow = TRUE, nrow=2),
                   NULL)
 names(quantileBoundaries) = names(boundaries) = nzNormedMarkers
+```
 
+The code below fits the model in the first slide.
+
+```{r singleFit}
+
+# split the data frame
+cells = split(cell, cell$slide_id)
 unconstrGMMfit = gluster(cells[[1]][,nzNormedMarkers])
 constrGMMfit = gluster(cells[[1]][,nzNormedMarkers], boundaryMarkers = boundaries,
                  qboundaryMarkers=quantileBoundaries)
-
-
 ```
 
-### Quality checking model fit
+###  Quality checking model fit
 
-```{r, visualization}
+```{r, visualization, eval=FALSE}
+
 
 # check convergence
 sapply(constrGMMfit$fit, function (x) x$convergence)
@@ -80,7 +86,7 @@ trash = sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, unco
 
 Sub-batches can be used if there are multiple regions per slide to assess the fit within each region. The model is fit at the slide level and then model fit is assessed by batch.
 
-```{r subBatch}
+```{r subBatch, eval=FALSE}
 # fitting on the same slide and getting model fit results by batch
 batchConstrGMMfit = gluster(cells[[1]][,nzNormedMarkers], boundaryMarkers = boundaries,
                  qboundaryMarkers=quantileBoundaries, subBatch = cells[[1]]$sample_id)
@@ -93,13 +99,65 @@ trash = sapply(unique(cells[[1]]$sample_id), function(x) plot.gluster(batchConst
 
 We can use mclapply from the parallel package to run gluster on multiple slides.
 
+```{r}
+quantileBoundaries = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
+                          NULL,
+                          NULL,
+                          NULL)
+boundaries = list(matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
+                  NULL,
+                  NULL,
+                  NULL,
+                  matrix(c(0,.3, .45, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(0,.3, .5, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(0,.4, .45, Inf), byrow = TRUE, nrow=2),
+                  NULL)
+```
+
 ```{r, batchFit}
-library(parallel)
+constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries, qboundaryMarkers = quantileBoundaries, n.cores = 40)
+
+#trash = sapply(names(constrCfGMMbunch), function(x) plot.gluster(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(constrGMMfit$expressionX[,1], probs=quantileBoundaries[[1]][2,1]), title = x ) )
+
 library(reactable)
-constrCfGMMbunch = mclapply(cells[1:5], function(x) gluster(x[,nzNormedMarkers], boundaryMarkers = boundaries, qboundaryMarkers=quantileBoundaries),  mc.cores = 5)
+convergenceTab = sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence}))
+# the model converged for most slides
+rowMeans(convergenceTab)
+reactable(convergenceTab)
 
-trash = sapply(names(constrCfGMMbunch), function(x) plot.gluster(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(constrGMMfit$expressionX[,1], probs=quantileBoundaries[[1]][2,1]), title = x ) )
 
-reactable(sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence})))
+```
 
+### Adjusting the boundary constraints
+
+We are unlikely to get a biologically consistent model fit without applying constraints or evaluating the boundaries. To improve fit across all slides, we visually assess the fit and adjust our initial starting boundaries. This can be done by visualizing each histogram (time intensive) or visualizing the estimated parameters across all slides and assessing the fit.
+
+```{r}
+markerind = 3
+invisible(capture.output(sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = markerind, boundary = quantile(constrCfGMMbunch[[markerind]]$expressionX[,1], probs=quantileBoundaries[[markerind]][2,1]), title = x ) )))
+```
+
+After visualizing the fits we can adjust the boundaries.
+
+```{r adjustedBoundaries}
+quantileBoundaries2 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
+                          NULL,
+                          NULL,
+                          NULL)
+boundaries2 = list(matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
+                  matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
+                  matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
+                  NULL,
+                  matrix(c(0,.3, .45, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(0,.3, .5, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(0,.4, .45, Inf), byrow = TRUE, nrow=2),
+                  NULL)
 ```
