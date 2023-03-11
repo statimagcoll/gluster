@@ -10,14 +10,27 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+## Loading Cody's Data
+
+```{r}
+cell = readRDS('/media/disk2/atlas_mxif/data/threshold_quantification_global_20221214.rds')
+#allMarkers = grep('^Median_Cell_', names(cell), value=TRUE)
+allMarkers <- c("CD3D", "CD4", "CD8", "CD68", "CD20", "CD11B", "FOXP3", "LYSOZYME", "DAPI")
+allMarkers = paste0("Median_Cell_", allMarkers)
+cell$slide_id = cell$SlideID
+```
+
 ## Loading Julia's mIF data
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 library(VectraPolarisData)
 spe_lung <- HumanLungCancerV3()
 
 # get the cell level imaging data with spatial coordinates
 cell = cbind(as.data.frame(colData(spe_lung)), as.data.frame(spatialCoords(spe_lung)) )
+
+#devtools::install_github('statimagcoll/gluster')
+allMarkers = grep('^entire_cell_.*total$', names(cell), value=TRUE)
 
 # get the clinical data for each sample
 #cd = as.data.frame(metadata(spe_lung)$clinical_data)
@@ -29,8 +42,6 @@ Before fitting the model, we apply a basic normalization and set some boundary c
 
 ```{r, setup}
 library(gluster)
-#devtools::install_github('statimagcoll/gluster')
-allMarkers = grep('^entire_cell_.*total$', names(cell), value=TRUE)
 # normalize the data 
 nzNormedMarkers = paste0('nzNorm_',allMarkers)
 cell = do.call(rbind, lapply(split(cell, cell$slide_id), function(df){df[,nzNormedMarkers] = log10(1+sweep(df[,allMarkers], 2, colMeans(replace(df[,allMarkers], df[,allMarkers]==0, NA), na.rm = TRUE ), FUN = '/' ) ); df }) )
@@ -43,6 +54,7 @@ quantileBoundaries = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
                           NULL,
                           NULL,
+                          NULL,
                           NULL)
 boundaries = list(matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
                   NULL,
@@ -51,6 +63,7 @@ boundaries = list(matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
                   matrix(c(0,.3, .45, Inf), byrow = TRUE, nrow=2),
                   matrix(c(0,.3, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(0,.4, .45, Inf), byrow = TRUE, nrow=2),
+                  NULL,
                   NULL)
 names(quantileBoundaries) = names(boundaries) = nzNormedMarkers
 ```
@@ -60,15 +73,15 @@ The code below fits the model in the first slide.
 ```{r singleFit}
 
 # split the data frame
-cells = split(cell, cell$slide_id)
-unconstrGMMfit = gluster(cells[[1]][,nzNormedMarkers])
-constrGMMfit = gluster(cells[[1]][,nzNormedMarkers], boundaryMarkers = boundaries,
-                 qboundaryMarkers=quantileBoundaries)
+cells = cell[cell$slide_id==cell$slide_id[1],]
+#unconstrGMMfit = gluster(cells[,nzNormedMarkers])
+constrGMMfit = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries,
+                 qboundaryMarkers=quantileBoundaries, ncores=10)
 ```
 
-###  Quality checking model fit
+### Quality checking model fit
 
-```{r, visualization, eval=FALSE}
+```{r, visualizeOneSlide}
 
 
 # check convergence
@@ -77,7 +90,7 @@ sapply(constrGMMfit$fit, function (x) x$convergence)
 trash = sapply(nzNormedMarkers, function(x) plot.gluster(constrGMMfit, marker = x, boundary = quantile(constrGMMfit$expressionX[,x], probs=quantileBoundaries[[x]][2,1], title=x) ) )
 
 # comparing constrained and unconstrained fits
-trash = sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, unconstrGMMfit, marker=x, title=x) )
+#trash = sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, unconstrGMMfit, marker=x, title=x) )
 
 
 ```
@@ -137,7 +150,9 @@ reactable(convergenceTab)
 We are unlikely to get a biologically consistent model fit without applying constraints or evaluating the boundaries. To improve fit across all slides, we visually assess the fit and adjust our initial starting boundaries. This can be done by visualizing each histogram (time intensive) or visualizing the estimated parameters across all slides and assessing the fit.
 
 ```{r}
-markerind = 3
+for(marker in names(boundaries)){
+  plot(constrCfGMMbunch, marker=marker)
+}
 invisible(capture.output(sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = markerind, boundary = quantile(constrCfGMMbunch[[markerind]]$expressionX[,1], probs=quantileBoundaries[[markerind]][2,1]), title = x ) )))
 ```
 

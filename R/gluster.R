@@ -12,6 +12,7 @@
 #' @param ... Arguments passed to cfGMM function
 #' @importFrom cfGMM cfGMM
 #' @importFrom stats quantile
+#' @importFrom parallel mcmapply
 #' @export
 #' @details Fits cfGMM models to each marker channel in a matrix of marker channels for one slide
 gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NULL, subBatch=NULL, ncores=1, ...){
