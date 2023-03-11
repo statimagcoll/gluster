@@ -46,7 +46,7 @@ gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NU
   if(ncores==1){
     result = mapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, ...=...))
   } else {
-    result = mcmapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, mc.cores=ncores, ...=...))
+    result = mcmapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, ...=...), mc.cores=ncores)
   }
   result = list(expressionZ = as.data.frame(do.call(cbind, result[3,])), expressionX=as.data.frame(do.call(cbind, result[4,])),
                 params = result[2,], fit=result[1,], subBatch=subBatch)
