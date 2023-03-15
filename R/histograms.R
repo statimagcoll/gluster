@@ -57,7 +57,10 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
       p <- p + ggplot2::geom_vline(xintercept=boundary, linetype="dashed", color = col)
     }
     if(tabl){
-      p2 <- gridExtra::tableGrob(round(as.data.frame(pars),3))
+      partab = rbind(x$params[[marker]][[subBatch]], NA)
+      rownames(partab)[4] = 'mode'
+      partab['mode', c(2,3)] =  (partab['alpha', c(2,3)]-1) * partab['beta', c(2,3)]
+      p2 <- gridExtra::tableGrob(round(as.data.frame(partab),3))
       # Set widths/heights to 'fill whatever space I have'
       p2$widths <- unit(rep(1, ncol(p2)), "null")
       p2$heights <- unit(rep(1, nrow(p2)), "null")
