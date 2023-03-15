@@ -10,7 +10,7 @@
 #' @param boundaryMarkers A nmarker list of 4x4 matrices giving the boundaries for the modes of the unexpressed and expressed cell distributions.
 #' @param qboundaryMarkers A nmarker list of 4x4 matrices giving the qauntile boundaries for the modes for the unexpressed and expressed cell distributions.
 #' @param n.cores Number of cores. Default to one less than the number of cores available on the machine.
-#' @param ... Arguments passed to cfGMM function
+#' @param ... Arguments passed to gluster.
 #' @importFrom cfGMM cfGMM
 #' @importFrom stats quantile
 #' @importFrom reactable reactable
@@ -21,7 +21,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
   if(is.null(n.cores)){n.cores = detectCores()-1}
   if(any(is.na(slide))){expressionMarkers = expressionMarkers[!is.na(slide)]; slide = slide[!is.na(slide)]}
   expressionMarkers = split(expressionMarkers, slide)
-  constrCfGMMbunch = mclapply(expressionMarkers, function(x) gluster(x, boundaryMarkers, qboundaryMarkers, subBatch),   mc.cores = n.cores)
+  constrCfGMMbunch = mclapply(expressionMarkers, function(x) gluster(x, boundaryMarkers, qboundaryMarkers, subBatch, ...),   mc.cores = n.cores)
   class(constrCfGMMbunch) = c('groupGluster', class(constrCfGMMbunch))
   return(constrCfGMMbunch)
 }

@@ -9,7 +9,6 @@ gluster(
   boundaryMarkers = NULL,
   qboundaryMarkers = NULL,
   subBatch = NULL,
-  ncores = 1,
   ...
 )
 }
@@ -21,8 +20,6 @@ gluster(
 \item{qboundaryMarkers}{A nmarker list of 4x4 matrices giving the qauntile boundaries for the modes for the unexpressed and expressed cell distributions.}
 
 \item{subBatch}{If there are multiple subBatch on a slide, subBatch can be used to return probability estimates independently for each region.}
-
-\item{ncores}{Number of cores to run in parallel.}
 
 \item{...}{Arguments passed to cfGMM function}
 }

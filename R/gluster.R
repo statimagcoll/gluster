@@ -8,14 +8,12 @@
 #' @param subBatch If there are multiple subBatch on a slide, subBatch can be used to return probability estimates independently for each region.
 #' @param boundaryMarkers A nmarker list of 4x4 matrices giving the boundaries for the modes of the unexpressed and expressed cell distributions.
 #' @param qboundaryMarkers A nmarker list of 4x4 matrices giving the qauntile boundaries for the modes for the unexpressed and expressed cell distributions.
-#' @param ncores Number of cores to run in parallel.
 #' @param ... Arguments passed to cfGMM function
 #' @importFrom cfGMM cfGMM
 #' @importFrom stats quantile
-#' @importFrom parallel mcmapply
 #' @export
 #' @details Fits cfGMM models to each marker channel in a matrix of marker channels for one slide
-gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NULL, subBatch=NULL, ncores=1, ...){
+gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NULL, subBatch=NULL, ...){
   if(is.null(subBatch)) subBatch = rep(1, nrow(expressionMarkers))
   expressionMarkers = as.data.frame(expressionMarkers)
   # There could be better checks here
@@ -43,11 +41,7 @@ gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NU
   }
   # run models
   if(is.null(boundaryMarkers)){ boundaryMarkers = rep(list(boundaryMarkers), ncol(expressionMarkers)) }
-  if(ncores==1){
-    result = mapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, ...=...))
-  } else {
-    result = mcmapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, ...=...), mc.cores=ncores)
-  }
+  result = mapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, ...=...))
   result = list(expressionZ = as.data.frame(do.call(cbind, result[3,])), expressionX=as.data.frame(do.call(cbind, result[4,])),
                 params = result[2,], fit=result[1,], subBatch=subBatch)
   class(result) = c('gluster', class(result))
@@ -80,16 +74,16 @@ glusterX = function(x, constraints=NULL, subBatch=NULL, nn0=200, ...){
   u.region <- unique(subBatch)
   # fit without constraints if none are passed
   if(sum(!zeroInds, na.rm=TRUE)>=nn0 & mean(naInds)!=1){
-  if(is.null(constraints)){
-    fit <- cfGMM::cfGMM(x, k=2, ...)
-  } else {
-    if(all(dim(constraints)!=c(2,2))){
-      stop('constraints must be NULL or a 2x2 matrix.')
+    if(is.null(constraints)){
+      fit <- cfGMM::cfGMM(x, k=2, ...)
     } else {
-      fit <- cfGMM::cfGMM(x, k=2, constraint = constraints, ...)
+      if(all(dim(constraints)!=c(2,2))){
+        stop('constraints must be NULL or a 2x2 matrix.')
+      } else {
+        fit <- cfGMM::cfGMM(x, k=2, constraint = constraints, ...)
+      }
     }
-  }
-  fit <- monoZ(fit)
+    fit <- monoZ(fit)
   } else {
     # cfGMM not fit
     fit = list(posterior=matrix(NA, nrow=sum(!zeroInds, na.rm=TRUE), ncol=2),

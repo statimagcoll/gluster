@@ -27,7 +27,7 @@ groupGluster(
 
 \item{n.cores}{Number of cores. Default to one less than the number of cores available on the machine.}
 
-\item{...}{Arguments passed to cfGMM function}
+\item{...}{Arguments passed to gluster.}
 }
 \description{
 Takes a cfGMM model and forces the right-most component

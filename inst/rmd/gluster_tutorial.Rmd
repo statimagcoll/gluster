@@ -44,7 +44,7 @@ Before fitting the model, we apply a basic normalization and set some boundary c
 library(gluster)
 # normalize the data 
 nzNormedMarkers = paste0('nzNorm_',allMarkers)
-cell = do.call(rbind, lapply(split(cell, cell$slide_id), function(df){df[,nzNormedMarkers] = log10(1+sweep(df[,allMarkers], 2, colMeans(replace(df[,allMarkers], df[,allMarkers]==0, NA), na.rm = TRUE ), FUN = '/' ) ); df }) )
+cell = do.call(rbind, lapply(split(cell, cell$slide_id), function(df){df[,nzNormedMarkers] = log10(1+sweep(df[,allMarkers], 2, colMeans(df[,allMarkers], na.rm = TRUE ), FUN = '/' ) ); df }) ) # replace(df[,allMarkers], df[,allMarkers]==0, NA)
 
 
 quantileBoundaries = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
@@ -73,10 +73,10 @@ The code below fits the model in the first slide.
 ```{r singleFit}
 
 # split the data frame
-cells = cell[cell$slide_id==cell$slide_id[1],]
+cells = cell[cell$slide_id==unique(cell$slide_id)[2],]
 #unconstrGMMfit = gluster(cells[,nzNormedMarkers])
 constrGMMfit = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries,
-                 qboundaryMarkers=quantileBoundaries, ncores=10)
+                 qboundaryMarkers=quantileBoundaries)
 ```
 
 ### Quality checking model fit
@@ -87,12 +87,45 @@ constrGMMfit = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries,
 # check convergence
 sapply(constrGMMfit$fit, function (x) x$convergence)
 # visualize constrained fits with quantile drawn on histogram
-trash = sapply(nzNormedMarkers, function(x) plot.gluster(constrGMMfit, marker = x, boundary = quantile(constrGMMfit$expressionX[,x], probs=quantileBoundaries[[x]][2,1], title=x) ) )
+invisible(sapply(nzNormedMarkers, function(x) plot(constrGMMfit, marker = x, boundary = quantile(constrGMMfit$expressionX[,x], probs=quantileBoundaries[[x]][2,1], na.rm=TRUE), title=x ) ))
+
+
+```
+
+Convergence failed for the CD8 marker. Looking at the histogram and parameter table, it looks like that marker had a small number of nonzero cells. Adjusting the constraints might improve the fit. We add in a lower bound of 1/2 for the expressed cell population for CD8. Then we refit the data with new constraints for all the markers based on visualization of previous histograms.
+
+```{r}
+
+# adjusted boundaries
+quantileBoundaries2 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
+                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
+                          NULL,
+                          NULL,
+                          NULL,
+                          NULL)
+boundaries2 = list(NULL,
+                  matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.3, .75, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.3, .75, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.4, .5, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.4, .5, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2))
+names(quantileBoundaries2) = names(boundaries2) = nzNormedMarkers
+constrGMMfit2 = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries2,
+                 qboundaryMarkers=quantileBoundaries2)
+```
+
+We can contrast the two model fits with the `hist_sr_contrast` function. This shows the original fit in green, with the updated fit in red to see how the histogram has changed between the two.
+
+```{r}
 
 # comparing constrained and unconstrained fits
-#trash = sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, unconstrGMMfit, marker=x, title=x) )
-
-
+invisible(sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, constrGMMfit2, marker=x, title=x) ))
 ```
 
 ## Running with sub-batches
@@ -110,31 +143,14 @@ trash = sapply(unique(cells[[1]]$sample_id), function(x) plot.gluster(batchConst
 
 ## Running gluster on multiple slides
 
-We can use mclapply from the parallel package to run gluster on multiple slides.
-
-```{r}
-quantileBoundaries = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
-                          NULL,
-                          NULL,
-                          NULL)
-boundaries = list(matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
-                  NULL,
-                  NULL,
-                  NULL,
-                  matrix(c(0,.3, .45, Inf), byrow = TRUE, nrow=2),
-                  matrix(c(0,.3, .5, Inf), byrow = TRUE, nrow=2),
-                  matrix(c(0,.4, .45, Inf), byrow = TRUE, nrow=2),
-                  NULL)
-```
+We can use `groupGluster` to run gluster on multiple slides. We start with the second round of boundaries that we chose from the first batch and run it on the same number of cores as slides. Each slide will be assigned to a separate core. The same boundaries are used for all the slides.
 
 ```{r, batchFit}
-constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries, qboundaryMarkers = quantileBoundaries, n.cores = 40)
+constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries2, qboundaryMarkers = quantileBoundaries2, n.cores = 12, ncores=1)
+saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds')
 
-#trash = sapply(names(constrCfGMMbunch), function(x) plot.gluster(constrCfGMMbunch[[x]], marker = 1, boundary = quantile(constrGMMfit$expressionX[,1], probs=quantileBoundaries[[1]][2,1]), title = x ) )
+marker=3
+invisible(sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = marker, boundary = quantile(constrGMMfit$expressionX[,marker], probs=quantileBoundaries[[marker]][2,1]), title = x ) ))
 
 library(reactable)
 convergenceTab = sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence}))
