@@ -92,7 +92,7 @@ invisible(sapply(nzNormedMarkers, function(x) plot(constrGMMfit, marker = x, bou
 
 ```
 
-Convergence failed for the CD8 marker. Looking at the histogram and parameter table, it looks like that marker had a small number of nonzero cells. Adjusting the constraints might improve the fit. We add in a lower bound of 1/2 for the expressed cell population for CD8. Then we refit the data with new constraints for all the markers based on visualization of previous histograms.
+Convergence failed for the CD8 marker. Adjusting the constraints might improve the fit. We add in a lower bound of 1/2 for the expressed cell population for CD8. Then we refit the data with new constraints for all the markers based on visualization of previous histograms. If it continues to fail, we can deal with it later by obtaining an estimated fit from the other slide models.
 
 ```{r}
 
@@ -146,7 +146,7 @@ trash = sapply(unique(cells[[1]]$sample_id), function(x) plot.gluster(batchConst
 We can use `groupGluster` to run gluster on multiple slides. We start with the second round of boundaries that we chose from the first batch and run it on the same number of cores as slides. Each slide will be assigned to a separate core. The same boundaries are used for all the slides.
 
 ```{r, batchFit, eval=FALSE}
-constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries2, qboundaryMarkers = quantileBoundaries2, n.cores = 12, ncores=1)
+constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries2, qboundaryMarkers = quantileBoundaries2, n.cores = 12)
 saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds')
 
 # library(reactable)
@@ -164,7 +164,7 @@ We are unlikely to get a biologically consistent model fit without applying cons
 
 ```{r, results='asis', fig.width=8, fig.height=3}
 readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds')
-marker = 7
+marker = 8
 for(marker in names(boundaries)){
   cat('\n####', marker, '\n')
   plot(constrCfGMMbunch, marker=marker)
@@ -173,10 +173,10 @@ for(marker in names(boundaries)){
 }
 ```
 
-After visualizing the fits we can adjust the boundaries.
+After visualizing the fits we can adjust the boundaries. FOXP3, is it a sparsely expressed or continuous marker?
 
 ```{r adjustedBoundaries}
-quantileBoundaries2 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
+quantileBoundaries3 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
                           matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
                           matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
@@ -184,7 +184,7 @@ quantileBoundaries2 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           NULL,
                           NULL,
                           NULL)
-boundaries2 = list(matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
+boundaries3 = list(matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .6, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf, 0, .5, 1.5), byrow = TRUE, nrow=2),
@@ -193,3 +193,9 @@ boundaries2 = list(matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .45, Inf), byrow = TRUE, nrow=2),
                   NULL)
 ```
+
+```{r}
+constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries3, qboundaryMarkers = quantileBoundaries3, n.cores = 12)
+saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit2.rds')
+```
+
