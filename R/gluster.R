@@ -42,7 +42,9 @@ gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NU
   # run models
   if(is.null(boundaryMarkers)){ boundaryMarkers = rep(list(boundaryMarkers), ncol(expressionMarkers)) }
   result = mapply(glusterX, x=expressionMarkers, constraints=boundaryMarkers, MoreArgs=list(subBatch=subBatch, ...=...))
-  result = list(expressionZ = as.data.frame(do.call(cbind, result[3,])), expressionX=as.data.frame(do.call(cbind, result[4,])),
+  result = list(expressionZ = as.data.frame(do.call(cbind, result[3,])),
+                expressionX=as.data.frame(do.call(cbind, result[4,])),
+                expressionW=as.data.frame(do.call(cbind, result[5,])),
                 params = result[2,], fit=result[1,], subBatch=subBatch)
   class(result) = c('gluster', class(result))
   return(result)
@@ -58,6 +60,7 @@ gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NU
 #' @param nn0 If there are fewer than nn0, then it will not fit the cfGMM. Default is 200.
 #' @param ... Arguments passed to cfGMM function
 #' @importFrom cfGMM cfGMM
+#' @importFrom stats pgamma
 #' @export
 #' @details Takes a cfGMM model and forces the right-most component
 #' probabilities to be monotonic increasing with respect
@@ -115,6 +118,6 @@ glusterX = function(x, constraints=NULL, subBatch=NULL, nn0=200, ...){
   post0$x <- y
   # delete large repetitive objects from fit
   fit$x <- fit$posterior <- NULL
-
-  return(list(fit=fit, param.table=param.table, postZ=post0$comp2, x=post0$x))
+  w = pgamma(post0$x, shape=param.table[2,3],scale=param.table[3,3])
+  return(list(fit=fit, param.table=param.table, postZ=post0$comp2, x=post0$x, w=w))
 }

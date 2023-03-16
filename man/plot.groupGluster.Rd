@@ -37,8 +37,6 @@
 \item{print}{logical whether to display the plot. Default value TRUE.}
 
 \item{...}{Arguments passed to XX}
-
-\item{subBatch}{If there are multiple subBatch on a slide, subBatch can be used to return probability estimates independently for each region.}
 }
 \description{
 Takes a cfGMM model and forces the right-most component

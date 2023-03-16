@@ -108,17 +108,65 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.
 }
 
 
+
 #' Fits a gamma mixture model to aid clustering of mIF imaging data
 #'
 #'
-#' @param par.mat 2x2 parameter matrix
-#' @import patchwork
-#' @details Internal Function
-#' Calculate mode from parameter matrix
-get.mode <- function(par.mat){
-  modes <- c(NA, (par.mat[2,2]-1)*par.mat[3,2], (par.mat[2,3]-1)*par.mat[3,3])
-  par.mat <- rbind(par.mat, modes)
-  return(par.mat)
+
+#' @param ... Matrices to compare to standard labels.
+#' @param standard A matrix indicating gold/silver standard positive cells.
+#' @param batch Split kappa computation by this variable.
+#' @importFrom stats dgamma
+#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
+#' @importFrom rlang UQ
+#' @importFrom hrbrthemes theme_ipsum
+#' @importFrom gridExtra tableGrob
+#' @importFrom stats na.omit density
+#' @export
+#' @details Plot a histogram of a gluster model. Plots one model.
+#' Takes a gluster object and plots the histogram with the fitted model and parameter values.
+kappaGroupGluster = function(..., standard, batch){
+  standard = as.data.frame(standard)
+  # cohen's kappa
+  x = lapply(list(...), as.data.frame)
+  # check all dimensions match
+  markers = colnames(standard)
+
+  # Compute kappa for each method, slide, and marker
+  cohen.kappa.df = lapply(x, function(xmat, standard, batch){
+    result2 = as.data.frame(t(mapply(function(sxmat, sstandard){
+      result = mapply(function(xv, yv){
+        po=table(xv, yv)
+        po = po/sum(po)
+        pe=sum(rowSums(po) * colSums(po))
+        po=sum(po[c(1,4)])
+        (po-pe)/(1-pe)  }, xv=sxmat, yv=sstandard)
+      #result$method = if(!is.null(rownames(result))) rownames(result) else
+      return(result)
+    }, sxmat=split(xmat, batch), sstandard=split(standard, batch) ) ))
+    result2$batch = rownames(result2)
+    result2
+  }, standard=standard, batch=batch)
+  if(is.null(names(cohen.kappa.df))) names(cohen.kappa.df)=paste0('method', 1:length(cohen.kappa.df))
+  cohen.kappa.df = lapply(names(cohen.kappa.df), function(xname){res=cohen.kappa.df[[xname]]; names(res) = c(markers, 'batch'); res$method=xname; res})
+  cohen.kappa.df = do.call(rbind,  cohen.kappa.df)
+
+  # reshape to long format?
+
+
+  # data_breaks <- data.frame(start = c(0, 0.1, 0.21, 0.41, 0.61, 0.81),  # Create data with breaks
+  #                           end = c(0.1, 0.21, 0.41, 0.61, 0.81, 1),
+  #                           colors = factor(c("no agreement","slight agreement", "fair agreement","moderate agreement",
+  #                                             "substantial agreement","near-perfect agreement")))
+  # library(metR)
+  # library(magrittr)
+  # ggplot() + theme_ipsum(plot_title_size = 10,base_size = 8)  + coord_flip()+
+  #   geom_boxplot(data=cohen.kappa.df, aes(x=marker, y=cohen.kappa, fill=method), width=0.7, alpha=0.3)+ggtitle("Cohen's Kappa compared\nto Silver Standard")+xlab("Marker")
+  # geom_rect(data = data_breaks,
+  #           aes(ymin = start,ymax = end,xmin = 0,xmax = 4,fill = colors), alpha = 0.5) +scale_fill_grey()
+  return(cohen.kappa.df)
 }
+
+
 
 

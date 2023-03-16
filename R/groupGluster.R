@@ -37,7 +37,6 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @param component Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.
 #' @param diagnostic logical indicating whether to create the diagnostic plot. Default value is TRUE.
 #' @param histogram logical indicating whether to create the slide histograms.
-#' @param subBatch If there are multiple subBatch on a slide, subBatch can be used to return probability estimates independently for each region.
 #' @param title Title for the plot. Default is the marker name.
 #' @param color color for points.
 #' @param p a ggplot2 object to add to.
@@ -46,6 +45,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @importFrom ggplot2 aes ggplot ggtitle stat_function geom_vline unit annotation_custom geom_point xlab ylab
 #' @importFrom hrbrthemes theme_ipsum
 #' @importFrom stats na.omit
+#' @importFrom utils capture.output
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
 plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, histogram=FALSE, title=NULL, color='grey', p=NULL, print=TRUE, ...){
