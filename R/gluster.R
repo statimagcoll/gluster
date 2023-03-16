@@ -118,6 +118,7 @@ glusterX = function(x, constraints=NULL, subBatch=NULL, nn0=200, ...){
   post0$x <- y
   # delete large repetitive objects from fit
   fit$x <- fit$posterior <- NULL
-  w = pgamma(post0$x, shape=param.table[2,3],scale=param.table[3,3])
+  # compute expressionW by subBatch
+  w = unsplit(mapply(function(x, pars){pgamma(x, shape=pars[2,3],scale=pars[3,3])}, x=split(post0$x, subBatch), pars=param.table, SIMPLIFY = FALSE), subBatch)
   return(list(fit=fit, param.table=param.table, postZ=post0$comp2, x=post0$x, w=w))
 }
