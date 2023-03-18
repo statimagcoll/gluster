@@ -5,7 +5,6 @@
 #' to the input values.
 #'
 #' @param fit A cfGMM model object
-#' @export
 monoZ <- function(fit){
   z <- fit$posterior
   z1 <- z[,1]; z2 <- z[,2]
