@@ -2,12 +2,12 @@
 
 S3method(plot,gluster)
 S3method(plot,groupGluster)
+export(convCheck)
 export(gluster)
 export(glusterX)
 export(groupGluster)
 export(hist_sr_constrast)
 export(kappaGroupGluster)
-export(monoZ)
 import(patchwork)
 importFrom(cfGMM,cfGMM)
 importFrom(ggplot2,aes)
