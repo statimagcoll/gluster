@@ -15,6 +15,7 @@ Collate:
     'histograms.R'
     'monoZ.R'
     'groupGluster.R'
+    'diag.R'
 Imports:
   cfGMM,
   hrbrthemes,
