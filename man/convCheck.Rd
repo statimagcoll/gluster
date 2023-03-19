@@ -5,6 +5,8 @@
 \title{Fits a gamma mixture model to aid clustering of mIF imaging data}
 \usage{
 convCheck(gluster.fit, out.all = FALSE, return.result = FALSE)
+
+convCheck(gluster.fit, out.all = FALSE, return.result = FALSE)
 }
 \arguments{
 \item{gluster.fit}{gluster or groupGluster object.}
@@ -12,12 +14,20 @@ convCheck(gluster.fit, out.all = FALSE, return.result = FALSE)
 \item{out.all}{Whether to print out the full convergence result for all markers and slides, or just summary of non-convergence.}
 
 \item{return.result}{Whether to return the convergence result into an object.}
+
+\item{groupGluster.fit}{gluster or groupGluster object.}
 }
 \description{
 Takes a cfGMM model and forces the right-most component
 probabilities to be monotonic increasing with respect
 to the input values.
+
+Takes a cfGMM model and forces the right-most component
+probabilities to be monotonic increasing with respect
+to the input values.
 }
 \details{
+convergence check to gluster or batch gluster fits
+
 convergence check to gluster or batch gluster fits
 }
