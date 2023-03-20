@@ -36,6 +36,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @param marker Select which marker to plot. Can be a character or integer.
 #' @param component Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.
 #' @param diagnostic logical indicating whether to create the diagnostic plot. Default value is TRUE.
+#' @param interactive logical indicating whether diagnostic plot should be interactive.
 #' @param histogram logical indicating whether to create the slide histograms.
 #' @param title Title for the plot. Default is the marker name.
 #' @param color color for points.
@@ -46,9 +47,10 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @importFrom hrbrthemes theme_ipsum
 #' @importFrom stats na.omit
 #' @importFrom utils capture.output
+#' @importFrom plotly plot_ly layout
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
-plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, histogram=FALSE, title=NULL, color='grey', p=NULL, print=TRUE, ...){
+plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, interactive=FALSE, histogram=FALSE, title=NULL, color='grey', p=NULL, print=TRUE, ...){
   if(is.numeric(marker)){ marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(is.null(title)) title=marker
   if(diagnostic){
@@ -56,11 +58,20 @@ plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, histogr
       do.call(rbind, lapply(y$params[[marker]], function(z) z[,paste0('comp',component)]) )
     } ) ))
     plot.df$mode <- (plot.df$alpha-1)*plot.df$beta
-
+    if(interactive){
+      plot.df$slide_id <- names(x)
+      p1 <- plot_ly( plot.df, x = ~mode, y = ~lambda,
+                       marker = list(size = 10,color = 'rgba(255, 182, 193, .9)',
+                                     line = list(color = 'rgba(152, 0, 0, .8)',width = 2)),
+                       text = ~slide_id, type = "scatter", mode = 'markers')
+      p1 <- p1 %>% layout(title = marker,
+                              yaxis = list(zeroline = FALSE),
+                              xaxis = list(zeroline = FALSE))
+    }else{
     p1 <- ggplot(plot.df, aes(x=mode,y=lambda)) +
       geom_point(alpha=0.4, color=color, size=3) +
       xlab("Mode of Expressed Component")+ylab("Lambda of Expressed")+
-      theme_ipsum(axis_title_size = 12) + ggtitle(title[1])
+      theme_ipsum(axis_title_size = 12) + ggtitle(title[1])}
     if(print){
       print(p1)
     } else {

@@ -112,19 +112,21 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.
 #' Fits a gamma mixture model to aid clustering of mIF imaging data
 #'
 #'
-#' @param ... Matrices to compare to standard labels.
+#' @param ... Matrices to compare to standard labels. Rows are cells, columns are markers.
 #' @param standard A matrix indicating gold/silver standard positive cells.
-#' @param batch Split kappa computation by this variable.
+#' @param batch Split kappa computation by this variable. Similar to slide_id.
+#' @param method.names Names of the method. Default is "method" plus number.
 #' @importFrom stats dgamma
-#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
+#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_boxplot
 #' @importFrom rlang UQ
 #' @importFrom hrbrthemes theme_ipsum
 #' @importFrom gridExtra tableGrob
 #' @importFrom stats na.omit density
+#' @importFrom reshape2 melt
 #' @export
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-kappaGroupGluster = function(..., standard, batch){
+kappaGroupGluster = function(..., standard, batch, method.names=NULL){
   standard = as.data.frame(standard)
   # cohen's kappa
   x = lapply(list(...), as.data.frame)
@@ -146,78 +148,18 @@ kappaGroupGluster = function(..., standard, batch){
     result2$batch = rownames(result2)
     result2
   }, standard=standard, batch=batch)
-  if(is.null(names(cohen.kappa.df))) names(cohen.kappa.df)=paste0('method', 1:length(cohen.kappa.df))
+  if(is.null(method.names)) method.names=paste0('method', 1:length(cohen.kappa.df))
+  names(cohen.kappa.df)=method.names
   cohen.kappa.df = lapply(names(cohen.kappa.df), function(xname){res=cohen.kappa.df[[xname]]; names(res) = c(markers, 'batch'); res$method=xname; res})
   cohen.kappa.df = do.call(rbind,  cohen.kappa.df)
+  cohen.kappa.plot <- melt(cohen.kappa.df, id.vars = c("batch", "method"), variable.name = "marker",
+                           value.name = "Cohen.Kappa")
 
-  # reshape to long format?
 
-
-  # data_breaks <- data.frame(start = c(0, 0.1, 0.21, 0.41, 0.61, 0.81),  # Create data with breaks
-  #                           end = c(0.1, 0.21, 0.41, 0.61, 0.81, 1),
-  #                           colors = factor(c("no agreement","slight agreement", "fair agreement","moderate agreement",
-  #                                             "substantial agreement","near-perfect agreement")))
-  # library(metR)
-  # library(magrittr)
-  # ggplot() + theme_ipsum(plot_title_size = 10,base_size = 8)  + coord_flip()+
-  #   geom_boxplot(data=cohen.kappa.df, aes(x=marker, y=cohen.kappa, fill=method), width=0.7, alpha=0.3)+ggtitle("Cohen's Kappa compared\nto Silver Standard")+xlab("Marker")
-  # geom_rect(data = data_breaks,
-  #           aes(ymin = start,ymax = end,xmin = 0,xmax = 4,fill = colors), alpha = 0.5) +scale_fill_grey()
+  p <- ggplot() + theme_ipsum(plot_title_size = 10,base_size = 8)  + coord_flip()+
+     geom_boxplot(data=cohen.kappa.plot, aes(x=marker, y=Cohen.Kappa, fill=method), width=0.7, alpha=0.3)+ggtitle("Cohen's Kappa compared\nto Silver Standard")+xlab("Marker")
+  print(p)
   return(cohen.kappa.df)
-}
-
-
-#' Fits a gamma mixture model to aid clustering of mIF imaging data
-#'
-#'
-#' @param x A gluster object.
-#' @param marker Marker to be plotted, defaults to the first one.
-#' @param subBatch subBatch to be plotted, defaults to the first one.
-#' @param zero_include Logical whether the histogram should include zeros. Default is FALSE.
-#' @param breaks number of breaks for histogram
-#' @param boundary Vertical line drawn on plot to indicate boundary constraint.
-#' @param hist Logical indicating whether to plot histogram and base layer of plot.
-#' @param diag Logical indicating whether to plot interactive diagnostic plot.
-#' @param dens Logical indicating whether to draw parametric density over histogram.
-#' @param tabl Logical indicating whether to add table of parameter values.
-#' @param col Color of density.
-#' @param p ggplot object to add layers too. If hist=FALSE this must be specified.
-#' @param print logical whether to print the plot.
-#' @param title Title of plot.
-#' @param ... Arguments passed to cfGMM function
-#' @importFrom stats dgamma
-#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
-#' @importFrom rlang UQ
-#' @importFrom hrbrthemes theme_ipsum
-#' @importFrom gridExtra tableGrob
-#' @importFrom stats na.omit density
-#' @importFrom plotly plot_ly layout
-#' @import patchwork
-#' @export
-#' @details Plot a histogram of a gluster model. Plots one model.
-#' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-plot.groupGluster <- function(x, marker=1, slide=1, subBatch=1, zero_include=FALSE, breaks=40, title="histogram of x", boundary=NULL, hist=TRUE, dens=TRUE, tabl=FALSE, diag=TRUE, col='forestgreen', p=NULL, print=TRUE, ...){
-  x[[slide]] <- x.slide
-  plot.gluster(x.slide, slide=slide, subBatch=subBatch, zero_include=FALSE, breaks=40, title=title, boundary=boundary, hist=hist, dens=dens, tabl=tabl, col=col, p=p, print=print)
-  if(diag){
-    pars <- lapply(x, function(x){x[["params"]]})
-    pars <- lapply(pars, function(x){x[[marker]]})
-    pars <- do.call(c, pars)
-    pars <- lapply(pars, get.mode)
-    slide.names <- names(pars)
-
-    plot.df <- data.frame(lapply(pars, function(par.mat){par.mat[c(1,4),3]}))
-    plot.df1 <- data.frame(t(plot.df))
-    plot.df1$slide_id <- slide.names
-    fig1 <- plot_ly( plot.df1, x = ~modes, y = ~lambda,
-                     marker = list(size = 10,color = 'rgba(255, 182, 193, .9)',
-                                   line = list(color = 'rgba(152, 0, 0, .8)',width = 2)),
-                     text = ~slide_id, type = "scatter", mode = 'markers')
-    fig1 <- fig1 %>% layout(title = marker,
-                            yaxis = list(zeroline = FALSE),
-                            xaxis = list(zeroline = FALSE))
-    return(fig1)
-    }
 }
 
 #' Get mode from parameters

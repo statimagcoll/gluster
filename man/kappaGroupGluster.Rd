@@ -4,14 +4,16 @@
 \alias{kappaGroupGluster}
 \title{Fits a gamma mixture model to aid clustering of mIF imaging data}
 \usage{
-kappaGroupGluster(..., standard, batch)
+kappaGroupGluster(..., standard, batch, method.names = NULL)
 }
 \arguments{
-\item{...}{Matrices to compare to standard labels.}
+\item{...}{Matrices to compare to standard labels. Rows are cells, columns are markers.}
 
 \item{standard}{A matrix indicating gold/silver standard positive cells.}
 
-\item{batch}{Split kappa computation by this variable.}
+\item{batch}{Split kappa computation by this variable. Similar to slide_id.}
+
+\item{method.names}{Names of the method. Default is "method" plus number.}
 }
 \description{
 Fits a gamma mixture model to aid clustering of mIF imaging data
