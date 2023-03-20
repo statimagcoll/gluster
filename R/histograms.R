@@ -117,7 +117,7 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.
 #' @param batch Split kappa computation by this variable. Similar to slide_id.
 #' @param method.names Names of the method. Default is "method" plus number.
 #' @importFrom stats dgamma
-#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_boxplot
+#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_boxplot coord_flip
 #' @importFrom rlang UQ
 #' @importFrom hrbrthemes theme_ipsum
 #' @importFrom gridExtra tableGrob

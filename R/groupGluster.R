@@ -64,7 +64,7 @@ plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, interac
                        marker = list(size = 10,color = 'rgba(255, 182, 193, .9)',
                                      line = list(color = 'rgba(152, 0, 0, .8)',width = 2)),
                        text = ~slide_id, type = "scatter", mode = 'markers')
-      p1 <- p1 %>% layout(title = marker,
+      p1 <- layout(p=p1, title = marker,
                               yaxis = list(zeroline = FALSE),
                               xaxis = list(zeroline = FALSE))
     }else{
