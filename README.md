@@ -1,7 +1,7 @@
 Guide for using Gluster in semi-automated cell gating
 ================
 Ruby Xiong and Simon Vandekar
-2023-03-18
+2023-03-21
 
 # gluster
 
@@ -21,7 +21,7 @@ if( !require(devtools) ) install.packages("devtools")
 devtools::install_github( "statimagcoll/gluster" )
 ```
 
-    ## Skipping install of 'gluster' from a github remote, the SHA1 (dddd572e) has not changed since last install.
+    ## Skipping install of 'gluster' from a github remote, the SHA1 (de88bcfd) has not changed since last install.
     ##   Use `force = TRUE` to force installation
 
 ## Loading mIF data from `VectraPolarisData`
@@ -93,14 +93,14 @@ convCheck(constrGMMfit)
 sapply(nzNormedMarkers, function(x) plot(constrGMMfit, marker = x, boundary = quantile(constrGMMfit$expressionX[,x], probs=quantileBoundaries[[x]][2,1], title=x) ))
 ```
 
-![](Instuctions_files/figure-gfm/visualization-1.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-2.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-3.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-4.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-5.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-6.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-7.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-8.png)<!-- -->
+![](README_files/figure-gfm/visualization-1.png)<!-- -->![](README_files/figure-gfm/visualization-2.png)<!-- -->![](README_files/figure-gfm/visualization-3.png)<!-- -->![](README_files/figure-gfm/visualization-4.png)<!-- -->![](README_files/figure-gfm/visualization-5.png)<!-- -->![](README_files/figure-gfm/visualization-6.png)<!-- -->![](README_files/figure-gfm/visualization-7.png)<!-- -->![](README_files/figure-gfm/visualization-8.png)<!-- -->
 
 ``` r
 # comparing constrained and unconstrained fits
 trash = sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, unconstrGMMfit, marker=x, title=x) )
 ```
 
-![](Instuctions_files/figure-gfm/visualization-9.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-10.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-11.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-12.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-13.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-14.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-15.png)<!-- -->![](Instuctions_files/figure-gfm/visualization-16.png)<!-- -->
+![](README_files/figure-gfm/visualization-9.png)<!-- -->![](README_files/figure-gfm/visualization-10.png)<!-- -->![](README_files/figure-gfm/visualization-11.png)<!-- -->![](README_files/figure-gfm/visualization-12.png)<!-- -->![](README_files/figure-gfm/visualization-13.png)<!-- -->![](README_files/figure-gfm/visualization-14.png)<!-- -->![](README_files/figure-gfm/visualization-15.png)<!-- -->![](README_files/figure-gfm/visualization-16.png)<!-- -->
 
 ## Running with sub-batches
 
@@ -116,7 +116,7 @@ batchConstrGMMfit = gluster(cells[[1]][,nzNormedMarkers], boundaryMarkers = boun
 trash = sapply(unique(cells[[1]]$sample_id), function(x) plot(batchConstrGMMfit, subBatch = x, title=x) )
 ```
 
-![](Instuctions_files/figure-gfm/subBatch-1.png)<!-- -->![](Instuctions_files/figure-gfm/subBatch-2.png)<!-- -->![](Instuctions_files/figure-gfm/subBatch-3.png)<!-- -->![](Instuctions_files/figure-gfm/subBatch-4.png)<!-- -->![](Instuctions_files/figure-gfm/subBatch-5.png)<!-- -->
+![](README_files/figure-gfm/subBatch-1.png)<!-- -->![](README_files/figure-gfm/subBatch-2.png)<!-- -->![](README_files/figure-gfm/subBatch-3.png)<!-- -->![](README_files/figure-gfm/subBatch-4.png)<!-- -->![](README_files/figure-gfm/subBatch-5.png)<!-- -->
 
 ## Running gluster on multiple slides
 
@@ -147,6 +147,37 @@ convCheck(constrCfGMMbunch)
 
 Before plotting and looking over the (# slides $\times$ \# markers)
 histograms, it might be easier to identify the problematic ones through
-diagnostic plot first:
+diagnostic plot first, then look at all histograms:
 
-### Plotting all histograms
+``` r
+plot(constrCfGMMbunch, diagnostic=TRUE, interactive=TRUE, histogram=TRUE)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+
+### Cohen’s Kappa
+
+To compare agreement between two binomial variables, we can use cohen’s
+kappa. Here is the usage of the function with simulated data:
+
+``` r
+test1 <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
+test2 <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
+standard.mat <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
+colnames(test1) <- colnames(test2) <- colnames(standard.mat) <- c("a", "b")
+kappaGroupGluster(test1, test2, standard=standard.mat, method.names = c("test1", "test2"), batch=rep(1:5, each=10))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+    ##              a           b batch method
+    ## 1  -0.25000000 -0.19047619     1  test1
+    ## 2   0.04040404  0.26108374     2  test1
+    ## 3   0.01234568 -0.18518519     3  test1
+    ## 4  -0.10000000  0.15422886     4  test1
+    ## 5   0.05472637 -0.15662651     5  test1
+    ## 11 -0.10000000  0.18987342     1  test2
+    ## 21 -0.06060606  0.10000000     2  test2
+    ## 31  0.13253012 -0.25000000     3  test2
+    ## 41 -0.26903553  0.19799499     4  test2
+    ## 51 -0.22448980  0.07317073     5  test2
