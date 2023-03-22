@@ -51,7 +51,8 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
 plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, interactive=FALSE, histogram=FALSE, title=NULL, color='grey', p=NULL, print=TRUE, ...){
-  if(is.numeric(marker)){ marker=colnames(x[[1]][["expressionX"]])[marker] }
+  markerind = marker
+  if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(is.null(title)) title=marker
   if(diagnostic){
     plot.df = as.data.frame(do.call(rbind, lapply(x, function(y){
@@ -79,5 +80,5 @@ plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, interac
     }
   }
   if(histogram)
-    invisible(capture.output(sapply(names(x), function(y) plot(x[[y]], marker = markerind, title = x ) )))
+    invisible(capture.output(sapply(names(x), function(y) plot(x[[y]], marker = markerind, title = y ) )))
 }

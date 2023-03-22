@@ -152,6 +152,7 @@ kappaGroupGluster = function(..., standard, batch, method.names=NULL){
   names(cohen.kappa.df)=method.names
   cohen.kappa.df = lapply(names(cohen.kappa.df), function(xname){res=cohen.kappa.df[[xname]]; names(res) = c(markers, 'batch'); res$method=xname; res})
   cohen.kappa.df = do.call(rbind,  cohen.kappa.df)
+  colnames(cohen.kappa.df)[1:length(markers)] <- markers
   cohen.kappa.plot <- melt(cohen.kappa.df, id.vars = c("batch", "method"), variable.name = "marker",
                            value.name = "Cohen.Kappa")
 
