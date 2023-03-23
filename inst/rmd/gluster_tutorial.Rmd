@@ -13,6 +13,7 @@ vignette: >
 ## Loading Cody's Data
 
 ```{r}
+library(ggplot2)
 cell = readRDS('/media/disk2/atlas_mxif/data/threshold_quantification_global_20230315.rds')
 #allMarkers = grep('^Median_Cell_', names(cell), value=TRUE)
 allMarkers <- c("CD3D", "CD4", "CD8", "CD68", "CD20", "CD11B", "FOXP3", "LYSOZYME", "DAPI")
@@ -75,7 +76,7 @@ names(quantileBoundaries) = names(boundaries) = nzNormedMarkers
 
 The code below fits the model in the first slide.
 
-```{r singleFit}
+```{r singleFit, eval=FALSE}
 
 # split the data frame
 cells = cell[cell$slide_id==unique(cell$slide_id)[2],]
@@ -86,21 +87,16 @@ constrGMMfit = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries,
 
 ### Quality checking model fit
 
-```{r, visualizeOneSlide}
-
-
+```{r, visualizeOneSlide, eval=FALSE}
 # check convergence
 sapply(constrGMMfit$fit, function (x) x$convergence)
 # visualize constrained fits with quantile drawn on histogram
 invisible(sapply(nzNormedMarkers, function(x) plot(constrGMMfit, marker = x, boundary = quantile(constrGMMfit$expressionX[,x], probs=quantileBoundaries[[x]][2,1], na.rm=TRUE), title=x ) ))
-
-
 ```
 
 Convergence failed for the CD8 marker. Adjusting the constraints might improve the fit. We add in a lower bound of 1/2 for the expressed cell population for CD8. Then we refit the data with new constraints for all the markers based on visualization of previous histograms. If it continues to fail, we can deal with it later by obtaining an estimated fit from the other slide models.
 
 ```{r}
-
 # adjusted boundaries
 quantileBoundaries2 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
@@ -121,14 +117,13 @@ boundaries2 = list(NULL,
                   matrix(c(-Inf,.4, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2))
 names(quantileBoundaries2) = names(boundaries2) = nzNormedMarkers
-constrGMMfit2 = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries2,
-                 qboundaryMarkers=quantileBoundaries2)
+#constrGMMfit2 = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries2,
+#                 qboundaryMarkers=quantileBoundaries2)
 ```
 
 We can contrast the two model fits with the `hist_sr_contrast` function. This shows the original fit in green, with the updated fit in red to see how the histogram has changed between the two.
 
-```{r}
-
+```{r, eval=FALSE}
 # comparing constrained and unconstrained fits
 invisible(sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, constrGMMfit2, marker=x, title=x) ))
 ```
@@ -143,8 +138,6 @@ batchConstrGMMfit = gluster(cells[[1]][,nzNormedMarkers], boundaryMarkers = boun
                  qboundaryMarkers=quantileBoundaries, subBatch = cells[[1]]$sample_id)
 # visualize by subBatch for the first markers
 trash = sapply(unique(cells[[1]]$sample_id), function(x) plot.gluster(batchConstrGMMfit, subBatch = x, title=x) )
-
-
 ```
 
 ## Running gluster on multiple slides
@@ -171,20 +164,25 @@ saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds'
 
 ```
 
-### Adjusting the boundary constraints {.tabset}
 
-We are unlikely to get a biologically consistent model fit without applying constraints or evaluating the boundaries. To improve fit across all slides, we visually assess the fit and adjust our initial starting boundaries. This can be done by visualizing each histogram (time intensive) or visualizing the estimated parameters across all slides and assessing the fit.
+# Visualizing the fitted distributions {.tabset}
 
-```{r, results='asis', fig.width=8, fig.height=3}
+
+```{r, results='asis', fig.width=8, fig.height=3, warning=FALSE}
 constrCfGMMbunch = readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds')
 for(marker in names(boundaries)){
-  cat('\n####', marker, '\n')
+  cat('\n## ', marker, '\n')
   plot(constrCfGMMbunch, marker=marker)
   invisible(capture.output(sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = marker, boundary = quantile(constrCfGMMbunch[[marker]]$expressionX[,1], probs=quantileBoundaries[[marker]][2,1]), title = x, tabl=TRUE ) )))
   cat('\n\n')
 }
 ```
 
+
+# Adjusting the boundaries
+
+
+We are unlikely to get a biologically consistent model fit without applying constraints or evaluating the boundaries. To improve fit across all slides, we visually assess the fit and adjust our initial starting boundaries. This can be done by visualizing each histogram (time intensive) or visualizing the estimated parameters across all slides and assessing the fit.
 After visualizing the fits we can adjust the boundaries. FOXP3, is it a sparsely expressed or continuous marker?
 
 ```{r adjustedBoundaries}
@@ -198,10 +196,10 @@ quantileBoundaries3 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           NULL)
 # might look more like the manual labels
 boundaries3 = list(matrix(c(-Inf,.3, .8, Inf), byrow = TRUE, nrow=2),
-                  matrix(c(-Inf,.3, .3, .6), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .6, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf, 0, .5, 1.5), byrow = TRUE, nrow=2),
-                  matrix(c(-Inf,.3, .75, 1), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.3, .45, 1), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .4, .75), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .45, Inf), byrow = TRUE, nrow=2),
                   NULL)
@@ -217,7 +215,8 @@ boundaries4 = list(matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2))
 ```
 
-```{r}
+
+```{r, eval=FALSE}
 constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries3, qboundaryMarkers = quantileBoundaries3, n.cores = 12)
 saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit2.rds')
 
@@ -226,23 +225,24 @@ saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit3.rds
 ```
 
 
-```{r}
-constrCfGMMbunch = readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit2.rds')
+# The new fitted distributions {.tabset}
+
+```{r, results='asis', fig.width=8, fig.height=3, warning=FALSE}
+constrCfGMMbunch = readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit3.rds')
 marker = 2
 for(marker in names(boundaries)){
-  cat('\n####', marker, '\n')
+  cat('\n## ', marker, '\n')
   plot(constrCfGMMbunch, marker=marker)
-  invisible(capture.output(sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = marker, boundary = quantile(constrCfGMMbunch[[marker]]$expressionX[,1], probs=quantileBoundaries[[marker]][2,1]), title = x, tabl=TRUE ) )))
+  invisible(capture.output(sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = marker, title = x, tabl=TRUE ) ))) # boundary = quantile(constrCfGMMbunch[[marker]]$expressionX[,1], probs=quantileBoundaries[[marker]][2,1]), 
   cat('\n\n')
 }
 ```
 
 
+# Evaluate fit using Cohen's Kappa
 
-## Evaluate fit using Cohen's Kappa
-
-```{r}
-
+```{r, fig.width=5, fig.height=5}
+#constrCfGMMbunch = readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit3.rds')
 # constrCfGMMbunch = lapply(constrCfGMMbunch, function(x, subBatch=1){
 #   result = as.data.frame(do.call(cbind, lapply(names(x$expressionX), function(nm, subBatch){
 #   pars = x$params[[nm]][[subBatch]]
@@ -264,15 +264,17 @@ cell[,names(merged)] = merged
 
 merged = unsplit(lapply(names(constrCfGMMbunch), function(x){
   constrCfGMMbunch[[x]]$expressionZ<-as.data.frame(constrCfGMMbunch[[x]]$expressionW>0.5)
-  names(constrCfGMMbunch[[x]]$expressionZ) = paste0('cfGMMPhenoMarg_', names(constrCfGMMbunch[[x]]$expressionZ))
-  rownames(constrCfGMMbunch[[x]]$expressionZ) = paste0(x, rownames(constrCfGMMbunch[[x]]$expressionZ))
-  constrCfGMMbunch[[x]]$expressionZ}), cell$slide_id)
+  names(constrCfGMMbunch[[x]]$expressionW) = paste0('cfGMMPhenoMarg_', names(constrCfGMMbunch[[x]]$expressionW))
+  rownames(constrCfGMMbunch[[x]]$expressionW) = paste0(x, rownames(constrCfGMMbunch[[x]]$expressionW))
+  constrCfGMMbunch[[x]]$expressionW}), cell$slide_id)
 cell[,names(merged)] = merged
 
+saveRDS(cell, file='/media/disk2/atlas_mxif/data/cody_cfGMM.rds')
 
-#debug(kappaGroupGluster)
+invisible(kappaGroupGluster(posterior = cell[, paste0('cfGMMPheno_nzNorm_Median_Cell_', phenotypes)],
+                            marginal=cell[, paste0('cfGMMPhenoMarg_nzNorm_Median_Cell_', phenotypes)],
+                            standard = cell[,phenotypes], batch = cell$slide_id))
 # 
-test = kappaGroupGluster(posterior = cell[, paste0('cfGMMPheno_nzNorm_Median_Cell_', phenotypes)], marginal=cell[, paste0('cfGMMPhenoMarg_nzNorm_Median_Cell_', phenotypes)], standard = cell[,phenotypes], batch = cell$slide_id)
 
 # computes cell proportions for each phenotyping method
 res = do.call(rbind, by(cell, cell$slide_id, function(df) colMeans(df[,c(phenotypes, paste0('cfGMMPheno_nzNorm_Median_Cell_', phenotypes) , paste0('cfGMMPhenoMarg_nzNorm_Median_Cell_', phenotypes))], na.rm=TRUE) ))
