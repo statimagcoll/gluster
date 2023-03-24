@@ -43,7 +43,7 @@ convCheck <- function(gluster.fit, out.all=FALSE, return.result=FALSE){
 #' probabilities to be monotonic increasing with respect
 #' to the input values.
 #'
-#' @param groupGluster.fit gluster or groupGluster object.
+#' @param gluster.fit gluster or groupGluster object.
 #' @param out.all Whether to print out the full convergence result for all markers and slides, or just summary of non-convergence.
 #' @param return.result Whether to return the convergence result into an object.
 #' @importFrom reactable reactable
