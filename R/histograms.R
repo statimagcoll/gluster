@@ -114,6 +114,7 @@ hist_sr_constrast_inner <- function(fit1, fit2, marker=1, subBatch=1, title=NULL
 #' @param fit2 Another gluster or groupGluster object, possibly that is a refit of fit1 with updated constraints. Has to be of the same class as fit1.
 #' @param marker Marker to be plotted, defaults to the first one.
 #' @param subBatch subBatch to be plotted, defaults to the first one.
+#' @param slide Slide to be plotted, defaults to the first one.
 #' @param title Title of plot.
 #' @param ... Arguments passed to plot.gluster
 #' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
@@ -123,13 +124,14 @@ hist_sr_constrast_inner <- function(fit1, fit2, marker=1, subBatch=1, title=NULL
 #' @export
 #' @details Plot histogram constrast of two gluster or groupGluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, ...){
+hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=NULL, ...){
   if(class(fit1)!=class(fit2)){
     print("Two objects are not of same class! Please change input.")
     } else if (class(fit1)[1]=="gluster"){
+      marker.name <- names(fit1[[1]])[marker]
       hist_sr_constrast_inner(fit1, fit2, marker=marker, subBatch=subBatch, title=title, ...)
     } else if (class(fit1)[1]=="groupGluster"){
-      sapply(names(fit1), function(y) hist_sr_constrast_inner(fit1[[y]],fit2[[y]], marker = marker, subBatch=subBatch, title = paste0(marker,"_", y) ) )
+      hist_sr_constrast_inner(fit1[[slide]],fit2[[slide]], marker = marker, subBatch=subBatch, title = title )
     } else {print("Invalid input class! Please change input.")}
 }
 
