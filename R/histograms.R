@@ -92,8 +92,8 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
 hist_sr_constrast_inner <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, ...){
-  p <- plot.gluster(x=fit1, marker=marker, subBatch=subBatch, title=title, print=FALSE, ...)
-  p <- plot.gluster(x=fit2, marker=marker, subBatch=subBatch, title=title, hist=FALSE, dens=TRUE, tabl=FALSE, p=p, col='red', print=FALSE, ...)
+  p <- plot(x=fit1, marker=marker, subBatch=subBatch, title=title, print=FALSE, ...)
+  p <- plot(x=fit2, marker=marker, subBatch=subBatch, title=title, hist=FALSE, dens=TRUE, tabl=FALSE, p=p, col='red', print=FALSE, ...)
 
   pars = fit2$params[[marker]][[subBatch]]
   # p <- p + ggplot2::stat_function(fun = fun1, n = 101, alpha=0.3, color="red", xlim=p.range) +
