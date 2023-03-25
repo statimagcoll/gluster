@@ -89,10 +89,9 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
 #' @importFrom hrbrthemes theme_ipsum
 #' @importFrom gridExtra tableGrob
 #' @import patchwork
-#' @export
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.table=FALSE, ...){
+hist_sr_constrast_inner <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, ...){
   p <- plot.gluster(x=fit1, marker=marker, subBatch=subBatch, title=title, print=FALSE, ...)
   p <- plot.gluster(x=fit2, marker=marker, subBatch=subBatch, title=title, hist=FALSE, dens=TRUE, tabl=FALSE, p=p, col='red', print=FALSE, ...)
 
@@ -100,13 +99,39 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.
   # p <- p + ggplot2::stat_function(fun = fun1, n = 101, alpha=0.3, color="red", xlim=p.range) +
   #   ggplot2::stat_function(fun = fun2, n = 101, alpha=0.3, color="red", xlim=p.range) +
   #   ggplot2::geom_vline(xintercept=afterthresh, linetype="dashed", color = "red")
-  if(add.table){
-    pars <- rbind(pars, mode=c(NA, (pars[2,2]-1)*pars[3,2], (pars[2,3]-1)*pars[3,3]))
-    p <- p + annotation_custom(tableGrob(pars), xmin=35, xmax=50, ymin=-2.5, ymax=-1)
-  }
+  # add.table argument currently on hold
+  # if(add.table){
+  #   pars <- rbind(pars, mode=c(NA, (pars[2,2]-1)*pars[3,2], (pars[2,3]-1)*pars[3,3]))
+  #   p <- p + annotation_custom(tableGrob(pars), xmin=35, xmax=50, ymin=-2.5, ymax=-1)
+  # }
   print(p)
 }
 
+#' Fits a gamma mixture model to aid clustering of mIF imaging data
+#'
+#'
+#' @param fit1 A gluster or groupGluster object.
+#' @param fit2 Another gluster or groupGluster object, possibly that is a refit of fit1 with updated constraints. Has to be of the same class as fit1.
+#' @param marker Marker to be plotted, defaults to the first one.
+#' @param subBatch subBatch to be plotted, defaults to the first one.
+#' @param title Title of plot.
+#' @param ... Arguments passed to plot.gluster
+#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
+#' @importFrom hrbrthemes theme_ipsum
+#' @importFrom gridExtra tableGrob
+#' @import patchwork
+#' @export
+#' @details Plot histogram constrast of two gluster or groupGluster model. Plots one model.
+#' Takes a gluster object and plots the histogram with the fitted model and parameter values.
+hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, ...){
+  if(class(fit1)!=class(fit2)){
+    print("Two objects are not of same class! Please change input.")
+    } else if (class(fit1)[1]=="gluster"){
+      hist_sr_constrast_inner(fit1, fit2, marker=marker, subBatch=subBatch, title=title, ...)
+    } else if (class(fit1)[1]=="groupGluster"){
+      sapply(names(fit1), function(y) hist_sr_constrast_inner(fit1[[y]],fit2[[y]], marker = marker, subBatch=subBatch, title = paste0(marker,"_", y) ) )
+    } else {print("Invalid input class! Please change input.")}
+}
 
 
 #' Fits a gamma mixture model to aid clustering of mIF imaging data
@@ -126,7 +151,7 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, subBatch=1, title=NULL, add.
 #' @export
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-kappaGroupGluster = function(..., standard, batch, method.names=NULL){
+kappaGroupGluster = function(..., standard, batch){
   standard = as.data.frame(standard)
   # cohen's kappa
   x = lapply(list(...), as.data.frame)
@@ -148,6 +173,7 @@ kappaGroupGluster = function(..., standard, batch, method.names=NULL){
     result2$batch = rownames(result2)
     result2
   }, standard=standard, batch=batch)
+  method.names <- names(list(...))
   if(is.null(method.names)) method.names=paste0('method', 1:length(cohen.kappa.df))
   names(cohen.kappa.df)=method.names
   cohen.kappa.df = lapply(names(cohen.kappa.df), function(xname){res=cohen.kappa.df[[xname]]; names(res) = c(markers, 'batch'); res$method=xname; res})
