@@ -50,7 +50,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @importFrom plotly plot_ly layout
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
-plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, interactive=FALSE, histogram=FALSE, title=NULL, color='grey', p=NULL, print=TRUE, ...){
+plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE, histogram=FALSE, title=NULL, boundaries = NULL,color='grey', p=NULL, print=TRUE, ...){
   markerind = marker
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(is.null(title)) title=marker
@@ -80,5 +80,5 @@ plot.groupGluster <- function(x, marker=1, component=2, diagnostic=TRUE, interac
     }
   }
   if(histogram)
-    invisible(capture.output(sapply(names(x), function(y) plot(x[[y]], marker = markerind, title = y ) )))
+    invisible(capture.output(plot(x[[slide]], marker = markerind, title = title, boundaries=boundaries)))
 }
