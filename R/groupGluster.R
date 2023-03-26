@@ -34,6 +34,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #'
 #' @param x A groupGluster object
 #' @param marker Select which marker to plot. Can be a character or integer.
+#' @param slide Select which slide to plot. Can be a character or integer.
 #' @param component Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.
 #' @param diagnostic logical indicating whether to create the diagnostic plot. Default value is TRUE.
 #' @param interactive logical indicating whether diagnostic plot should be interactive.
