@@ -90,6 +90,7 @@ convCheck <- function(gluster.fit, out.all=FALSE, return.result=FALSE){
 #' @importFrom hrbrthemes theme_ipsum
 #' @importFrom gridExtra tableGrob
 #' @import patchwork
+#' @export
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
 diag_contrast <- function(fit1, fit2, marker=1, component=2, title="Contrastive Diagnostic Plot", fit.names=c("fit1", "fit2"),boundaries=NULL,...){
