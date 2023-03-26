@@ -7,11 +7,13 @@
 \method{plot}{groupGluster}(
   x,
   marker = 1,
+  slide = 1,
   component = 2,
   diagnostic = TRUE,
   interactive = FALSE,
   histogram = FALSE,
   title = NULL,
+  boundaries = NULL,
   color = "grey",
   p = NULL,
   print = TRUE,
@@ -22,6 +24,8 @@
 \item{x}{A groupGluster object}
 
 \item{marker}{Select which marker to plot. Can be a character or integer.}
+
+\item{slide}{Select which slide to plot. Can be a character or integer.}
 
 \item{component}{Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.}
 

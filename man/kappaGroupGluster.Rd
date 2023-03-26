@@ -4,7 +4,7 @@
 \alias{kappaGroupGluster}
 \title{Fits a gamma mixture model to aid clustering of mIF imaging data}
 \usage{
-kappaGroupGluster(..., standard, batch, method.names = NULL)
+kappaGroupGluster(..., standard, batch)
 }
 \arguments{
 \item{...}{Matrices to compare to standard labels. Rows are cells, columns are markers.}
