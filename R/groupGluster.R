@@ -50,7 +50,8 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @importFrom plotly plot_ly layout
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
-plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE, histogram=FALSE, title=NULL, boundaries = NULL,color='grey', p=NULL, print=TRUE, ...){
+plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE,
+                              histogram=FALSE, title=NULL, boundaries = NULL,color='grey', p=NULL, print=TRUE, ...){
   markerind = marker
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(is.null(title)) title=marker
@@ -69,10 +70,13 @@ plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE
                               yaxis = list(zeroline = FALSE),
                               xaxis = list(zeroline = FALSE))
     }else{
-    p1 <- ggplot(plot.df, aes(x=mode,y=lambda)) +
-      geom_point(alpha=0.4, color=color, size=3) +
-      xlab("Mode of Expressed Component")+ylab("Lambda of Expressed")+
-      theme_ipsum(axis_title_size = 12) + ggtitle(title[1])}
+      if(is.null(p)){p <- ggplot()}
+      p1 <- p +
+        geom_point(plot.df, aes(x=mode,y=lambda), alpha=0.4, color=color, size=3) +
+        xlab("Mode of Expressed Component")+ylab("Lambda of Expressed")+
+        theme_ipsum(axis_title_size = 12) + ggtitle(title[1])
+      }
+
     if(print){
       print(p1)
     } else {
