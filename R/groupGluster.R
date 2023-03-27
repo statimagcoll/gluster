@@ -40,6 +40,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @param interactive logical indicating whether diagnostic plot should be interactive.
 #' @param histogram logical indicating whether to create the slide histograms.
 #' @param title Title for the plot. Default is the marker name.
+#' @param boundaries Boundary (vertial dashed line) to be plotted on the histogram.
 #' @param color color for points.
 #' @param p a ggplot2 object to add to.
 #' @param print logical whether to display the plot. Default value TRUE.
@@ -55,7 +56,6 @@ plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE
                               histogram=FALSE, title=NULL, boundaries = NULL,color='grey', p=NULL, print=TRUE, ...){
   markerind = marker
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
-  if(is.null(title)) title=marker
   if(diagnostic){
     plot.df = as.data.frame(do.call(rbind, lapply(x, function(y){
       do.call(rbind, lapply(y$params[[marker]], function(z) z[,paste0('comp',component)]) )

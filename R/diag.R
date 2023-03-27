@@ -42,10 +42,10 @@ convCheck <- function(gluster.fit, out.all=FALSE, return.result=FALSE){
 #' @param fit1 A groupGluster object.
 #' @param fit2 Another groupGluster object, possibly that is a refit of fit1 with updated constraints.
 #' @param marker Marker to be plotted, defaults to the first one.
-#' @param subBatch subBatch to be plotted, defaults to the first one.
+#' @param component Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.
 #' @param title Title of plot.
-#' @param add.table logical indicating whether to add table of fit2 parameter values.
 #' @param fit.names Names of fit objects. Default to c("fit1", "fit2")
+#' @param boundaries Add vertical boundary lines to plot.
 #' @param ... Arguments passed to plot.gluster
 #' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_segment scale_color_manual
 #' @importFrom hrbrthemes theme_ipsum

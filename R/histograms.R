@@ -83,7 +83,6 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
 #' @param marker Marker to be plotted, defaults to the first one.
 #' @param subBatch subBatch to be plotted, defaults to the first one.
 #' @param title Title of plot.
-#' @param add.table logical indicating whether to add table of fit2 parameter values.
 #' @param ... Arguments passed to plot.gluster
 #' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
 #' @importFrom hrbrthemes theme_ipsum
@@ -142,7 +141,6 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=N
 #' @param ... Matrices to compare to standard labels. Rows are cells, columns are markers.
 #' @param standard A matrix indicating gold/silver standard positive cells.
 #' @param batch Split kappa computation by this variable. Similar to slide_id.
-#' @param method.names Names of the method. Default is "method" plus number.
 #' @importFrom stats dgamma
 #' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_boxplot coord_flip
 #' @importFrom rlang UQ
