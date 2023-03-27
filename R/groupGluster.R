@@ -42,7 +42,6 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @param title Title for the plot. Default is the marker name.
 #' @param boundary Boundary (vertial dashed line) to be plotted on the histogram.
 #' @param color color for points.
-#' @param p a ggplot2 object to add to.
 #' @param print logical whether to display the plot. Default value TRUE.
 #' @param ... Arguments passed to XX
 #' @importFrom ggplot2 aes ggplot ggtitle stat_function geom_vline unit annotation_custom geom_point xlab ylab
@@ -53,7 +52,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
 plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE,
-                              histogram=FALSE, title=NULL, boundary = NULL,color='grey', p=NULL, print=TRUE, ...){
+                              histogram=FALSE, title=NULL, boundary = NULL,color='grey', print=TRUE, ...){
   markerind = marker
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(diagnostic){
@@ -71,11 +70,10 @@ plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE
                               yaxis = list(zeroline = FALSE),
                               xaxis = list(zeroline = FALSE))
     }else{
-      if(is.null(p)){p <- ggplot()}
-      p1 <- p +
-        geom_point(plot.df, aes(x=mode,y=lambda), alpha=0.4, color=color, size=3) +
+      if(is.null(title)){title <- "Diagnostic Plot"}
+      p1 <- ggplot(plot.df)+  geom_point(aes(x=mode,y=lambda), alpha=0.4, color=color, size=3) +
         xlab("Mode of Expressed Component")+ylab("Lambda of Expressed")+
-        theme_ipsum(axis_title_size = 12) + ggtitle(title[1])
+        theme_ipsum(axis_title_size = 12) + ggtitle(title)
       }
 
     if(print){

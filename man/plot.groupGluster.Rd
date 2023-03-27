@@ -15,7 +15,6 @@
   title = NULL,
   boundary = NULL,
   color = "grey",
-  p = NULL,
   print = TRUE,
   ...
 )
@@ -40,8 +39,6 @@
 \item{boundary}{Boundary (vertial dashed line) to be plotted on the histogram.}
 
 \item{color}{color for points.}
-
-\item{p}{a ggplot2 object to add to.}
 
 \item{print}{logical whether to display the plot. Default value TRUE.}
 
