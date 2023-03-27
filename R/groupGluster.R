@@ -40,7 +40,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @param interactive logical indicating whether diagnostic plot should be interactive.
 #' @param histogram logical indicating whether to create the slide histograms.
 #' @param title Title for the plot. Default is the marker name.
-#' @param boundaries Boundary (vertial dashed line) to be plotted on the histogram.
+#' @param boundary Boundary (vertial dashed line) to be plotted on the histogram.
 #' @param color color for points.
 #' @param p a ggplot2 object to add to.
 #' @param print logical whether to display the plot. Default value TRUE.
@@ -53,7 +53,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
 plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE,
-                              histogram=FALSE, title=NULL, boundaries = NULL,color='grey', p=NULL, print=TRUE, ...){
+                              histogram=FALSE, title=NULL, boundary = NULL,color='grey', p=NULL, print=TRUE, ...){
   markerind = marker
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(diagnostic){
@@ -85,5 +85,5 @@ plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE
     }
   }
   if(histogram)
-    invisible(capture.output(plot(x[[slide]], marker = markerind, title = title, boundaries=boundaries)))
+    invisible(capture.output(plot(x[[slide]], marker = markerind, title = title, boundary=boundary)))
 }

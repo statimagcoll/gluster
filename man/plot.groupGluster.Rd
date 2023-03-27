@@ -13,7 +13,7 @@
   interactive = FALSE,
   histogram = FALSE,
   title = NULL,
-  boundaries = NULL,
+  boundary = NULL,
   color = "grey",
   p = NULL,
   print = TRUE,
@@ -37,7 +37,7 @@
 
 \item{title}{Title for the plot. Default is the marker name.}
 
-\item{boundaries}{Boundary (vertial dashed line) to be plotted on the histogram.}
+\item{boundary}{Boundary (vertial dashed line) to be plotted on the histogram.}
 
 \item{color}{color for points.}
 
