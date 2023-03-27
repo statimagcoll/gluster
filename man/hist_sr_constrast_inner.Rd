@@ -25,8 +25,6 @@ hist_sr_constrast_inner(
 \item{title}{Title of plot.}
 
 \item{...}{Arguments passed to plot.gluster}
-
-\item{add.table}{logical indicating whether to add table of fit2 parameter values.}
 }
 \description{
 Fits a gamma mixture model to aid clustering of mIF imaging data

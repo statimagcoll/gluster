@@ -37,6 +37,8 @@
 
 \item{title}{Title for the plot. Default is the marker name.}
 
+\item{boundaries}{Boundary (vertial dashed line) to be plotted on the histogram.}
+
 \item{color}{color for points.}
 
 \item{p}{a ggplot2 object to add to.}

@@ -22,15 +22,15 @@ diag_contrast(
 
 \item{marker}{Marker to be plotted, defaults to the first one.}
 
+\item{component}{Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.}
+
 \item{title}{Title of plot.}
 
 \item{fit.names}{Names of fit objects. Default to c("fit1", "fit2")}
 
+\item{boundaries}{Add vertical boundary lines to plot.}
+
 \item{...}{Arguments passed to plot.gluster}
-
-\item{subBatch}{subBatch to be plotted, defaults to the first one.}
-
-\item{add.table}{logical indicating whether to add table of fit2 parameter values.}
 }
 \description{
 Diagnostic plot - contrast
