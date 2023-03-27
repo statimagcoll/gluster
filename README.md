@@ -1,7 +1,7 @@
 Guide for using Gluster in semi-automated cell gating
 ================
 Ruby Xiong and Simon Vandekar
-2023-03-21
+2023-03-27
 
 # gluster
 
@@ -10,19 +10,10 @@ Gamma Mixture Models for Multiplexed Immunofluorescence Imaging Data
 Install Package
 
 ``` r
-if( !require(devtools) ) install.packages("devtools")
+# if( !require(devtools) ) install.packages("devtools")
+# devtools::install_github( "statimagcoll/gluster" )
+library(gluster)
 ```
-
-    ## Loading required package: devtools
-
-    ## Loading required package: usethis
-
-``` r
-devtools::install_github( "statimagcoll/gluster" )
-```
-
-    ## Skipping install of 'gluster' from a github remote, the SHA1 (de88bcfd) has not changed since last install.
-    ##   Use `force = TRUE` to force installation
 
 ## Loading mIF data from `VectraPolarisData`
 
@@ -44,8 +35,6 @@ batch effect and variation among slides. Quantile boundaries and fixed
 value boundaries are picked based on prior knowledge.
 
 ``` r
-library(gluster)
-#devtools::install_github('statimagcoll/gluster')
 allMarkers = grep('^entire_cell_.*total$', names(cell), value=TRUE)
 # normalize the data 
 nzNormedMarkers = paste0('nzNorm_',allMarkers)
@@ -90,14 +79,14 @@ constrGMMfit = gluster(cells[[1]][,nzNormedMarkers], boundaryMarkers = boundarie
 # check convergence
 convCheck(constrGMMfit)
 # visualize constrained fits with quantile drawn on histogram
-sapply(nzNormedMarkers, function(x) plot(constrGMMfit, marker = x, boundary = quantile(constrGMMfit$expressionX[,x], probs=quantileBoundaries[[x]][2,1], title=x) ))
+plots_hist <- sapply(nzNormedMarkers, function(x) plot(constrGMMfit, marker = x, boundary = quantile(constrGMMfit$expressionX[,x], probs=quantileBoundaries[[x]][2,1]), title=x))
 ```
 
 ![](README_files/figure-gfm/visualization-1.png)<!-- -->![](README_files/figure-gfm/visualization-2.png)<!-- -->![](README_files/figure-gfm/visualization-3.png)<!-- -->![](README_files/figure-gfm/visualization-4.png)<!-- -->![](README_files/figure-gfm/visualization-5.png)<!-- -->![](README_files/figure-gfm/visualization-6.png)<!-- -->![](README_files/figure-gfm/visualization-7.png)<!-- -->![](README_files/figure-gfm/visualization-8.png)<!-- -->
 
 ``` r
 # comparing constrained and unconstrained fits
-trash = sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, unconstrGMMfit, marker=x, title=x) )
+contrast_hist = sapply(nzNormedMarkers, function(x) hist_sr_constrast(constrGMMfit, unconstrGMMfit, marker=x, title=x) )
 ```
 
 ![](README_files/figure-gfm/visualization-9.png)<!-- -->![](README_files/figure-gfm/visualization-10.png)<!-- -->![](README_files/figure-gfm/visualization-11.png)<!-- -->![](README_files/figure-gfm/visualization-12.png)<!-- -->![](README_files/figure-gfm/visualization-13.png)<!-- -->![](README_files/figure-gfm/visualization-14.png)<!-- -->![](README_files/figure-gfm/visualization-15.png)<!-- -->![](README_files/figure-gfm/visualization-16.png)<!-- -->
@@ -150,10 +139,83 @@ histograms, it might be easier to identify the problematic ones through
 diagnostic plot first, then look at all histograms:
 
 ``` r
-plot(constrCfGMMbunch, diagnostic=TRUE, interactive=TRUE, histogram=TRUE)
+for(i in nzNormedMarkers){
+  plot(constrCfGMMbunch, diagnostic=TRUE,  interactive=FALSE, histogram=FALSE, marker=i, title=i)
+}
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-6.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-7.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-4-8.png)<!-- -->
+
+``` r
+slides.fit <- names(constrCfGMMbunch)
+for(i in slides.fit){
+  cat('\n#### ', i, " \n")
+  for(j in nzNormedMarkers){
+    plot(constrCfGMMbunch, marker=j, slide=i, title=paste0(i,"\n",j), diagnostic=FALSE, histogram=TRUE, 
+         boundary = quantile(constrCfGMMbunch[[i]]$expressionX[,j], probs=quantileBoundaries[[j]][2,1]))
+  }
+  cat('\n\n')
+}
+```
+
+#### \#01 0-889-121
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-5.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-6.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-7.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-8.png)<!-- -->
+
+#### \#02 1-037-393
+
+![](README_files/figure-gfm/unnamed-chunk-5-9.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-10.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-11.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-12.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-13.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-14.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-15.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-16.png)<!-- -->
+
+#### \#03 2-080-378
+
+![](README_files/figure-gfm/unnamed-chunk-5-17.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-18.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-19.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-20.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-21.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-22.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-23.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-5-24.png)<!-- -->
+
+### Quality check on model fitting: compare
+
+Again, we can compare it fitting with no boundaries.
+
+``` r
+# same as above , but fitting without boundaries
+CfGMMbunch = groupGluster(cells3[,nzNormedMarkers], slide = cells3$slide_id,n.cores = 5)
+convCheck(CfGMMbunch)
+```
+
+\[1\] “All converged.”
+
+``` r
+for(i in slides.fit){
+  cat('\n#### ', i, " \n")
+  for(j in nzNormedMarkers){
+    hist_sr_constrast(constrCfGMMbunch, CfGMMbunch, marker=j, slide=i, title=paste0(i,"\n",j), diagnostic=FALSE, histogram=TRUE,boundary = quantile(constrGMMbunch[[i]]$expressionX[,j], probs=quantileBoundaries[[j]][2,1]))
+  }
+  cat('\n\n')
+}
+```
+
+#### \#01 0-889-121
+
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-8.png)<!-- -->
+
+#### \#02 1-037-393
+
+![](README_files/figure-gfm/unnamed-chunk-6-9.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-11.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-12.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-13.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-14.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-15.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-16.png)<!-- -->
+
+#### \#03 2-080-378
+
+![](README_files/figure-gfm/unnamed-chunk-6-17.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-18.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-19.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-20.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-21.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-22.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-23.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-6-24.png)<!-- -->
+
+### Constrastive diagnostic plot
+
+We can overlay the diagnostic plot to further check what are the
+difference between the two fitted models.
+
+``` r
+for(i in nzNormedMarkers){
+  print(diag_contrast(constrCfGMMbunch, CfGMMbunch, marker=i, title=i, fit.names = c("Constrained", "Un-constrained")))
+}
+```
+
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
 
 ### Cohen’s Kappa
 
@@ -165,19 +227,19 @@ test1 <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
 test2 <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
 standard.mat <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
 colnames(test1) <- colnames(test2) <- colnames(standard.mat) <- c("a", "b")
-kappaGroupGluster(test1, test2, standard=standard.mat, method.names = c("test1", "test2"), batch=rep(1:5, each=10))
+kappaGroupGluster(test1, test2, standard=standard.mat, batch=rep(1:5, each=10))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-    ##              a           b batch method
-    ## 1  -0.25000000 -0.19047619     1  test1
-    ## 2   0.04040404  0.26108374     2  test1
-    ## 3   0.01234568 -0.18518519     3  test1
-    ## 4  -0.10000000  0.15422886     4  test1
-    ## 5   0.05472637 -0.15662651     5  test1
-    ## 11 -0.10000000  0.18987342     1  test2
-    ## 21 -0.06060606  0.10000000     2  test2
-    ## 31  0.13253012 -0.25000000     3  test2
-    ## 41 -0.26903553  0.19799499     4  test2
-    ## 51 -0.22448980  0.07317073     5  test2
+    ##              a           b batch  method
+    ## 1  -0.25000000 -0.19047619     1 method1
+    ## 2   0.04040404  0.26108374     2 method1
+    ## 3   0.01234568 -0.18518519     3 method1
+    ## 4  -0.10000000  0.15422886     4 method1
+    ## 5   0.05472637 -0.15662651     5 method1
+    ## 11 -0.10000000  0.18987342     1 method2
+    ## 21 -0.06060606  0.10000000     2 method2
+    ## 31  0.13253012 -0.25000000     3 method2
+    ## 41 -0.26903553  0.19799499     4 method2
+    ## 51 -0.22448980  0.07317073     5 method2
