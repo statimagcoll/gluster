@@ -33,7 +33,9 @@ diag_contrast(
 \item{...}{Arguments passed to plot.gluster}
 }
 \description{
-Diagnostic plot - contrast
+This can be seen as an overlay of the scatter plot diagnostic plot. While side-by-side comparison of the plots
+might have scale problem, "overlay" the scatter plot resolves this issue. The corresponding slides are also connected
+with dashed line, making the changes easier to spot.
 }
 \details{
 Plot a histogram of a gluster model. Plots one model.

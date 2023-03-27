@@ -9,6 +9,15 @@
 #' @param boundaryMarkers A nmarker list of 4x4 matrices giving the boundaries for the modes of the unexpressed and expressed cell distributions.
 #' @param qboundaryMarkers A nmarker list of 4x4 matrices giving the qauntile boundaries for the modes for the unexpressed and expressed cell distributions.
 #' @param ... Arguments passed to cfGMM function
+#'
+#' @return
+#' \item{expressionZ}{The monotone proportional density of second component}
+#' \item{expressionX}{The input expression value}
+#' \item{expressionW}{The raw proportional density of second component}
+#' \item{params}{The monotone proportional density of second component}
+#' \item{fit}{cfGMM::cfGMM fitting output}
+#' \item{subBatch}{same as the subBatch in the argument}
+#'
 #' @importFrom cfGMM cfGMM
 #' @importFrom stats quantile
 #' @export
@@ -53,7 +62,6 @@ gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NU
 #' Fits a gamma mixture model to a vector of expression data
 #'
 #'
-#'
 #' @param x A vector of expression values. Assumed to be coarsely normalized and transformed.
 #' @param constraints A nmarker list of 4x4 matrices giving the boundaries for the modes of the unexpressed and expressed cell distributions.
 #' @param subBatch If there are multiple subBatch on a slide, the vector subBatch can be used to return probability estimates independently for each region.
@@ -61,7 +69,6 @@ gluster <- function(expressionMarkers, boundaryMarkers=NULL, qboundaryMarkers=NU
 #' @param ... Arguments passed to cfGMM function
 #' @importFrom cfGMM cfGMM
 #' @importFrom stats pgamma
-#' @export
 #' @details Takes a cfGMM model and forces the right-most component
 #' probabilities to be monotonic increasing with respect
 #' to the input values.

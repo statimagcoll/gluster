@@ -2,7 +2,7 @@
 % Please edit documentation in R/diag.R
 \name{convCheck}
 \alias{convCheck}
-\title{Fits a gamma mixture model to aid clustering of mIF imaging data}
+\title{Checks convergence of gluster/groupGluster object}
 \usage{
 convCheck(gluster.fit, out.all = FALSE, return.result = FALSE)
 }
@@ -13,10 +13,11 @@ convCheck(gluster.fit, out.all = FALSE, return.result = FALSE)
 
 \item{return.result}{Whether to return the convergence result into an object.}
 }
+\value{
+Returns simple printout or dataframe of convergence result, depending on argument input.
+}
 \description{
-Takes a cfGMM model and forces the right-most component
-probabilities to be monotonic increasing with respect
-to the input values.
+This needs to be run before any plot of fitted result being made.
 }
 \details{
 convergence check to gluster or batch gluster fits

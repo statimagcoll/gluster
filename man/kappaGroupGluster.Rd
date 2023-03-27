@@ -2,7 +2,7 @@
 % Please edit documentation in R/histograms.R
 \name{kappaGroupGluster}
 \alias{kappaGroupGluster}
-\title{Fits a gamma mixture model to aid clustering of mIF imaging data}
+\title{Compare binary classification result using Cohen's Kappa}
 \usage{
 kappaGroupGluster(..., standard, batch)
 }
@@ -14,7 +14,8 @@ kappaGroupGluster(..., standard, batch)
 \item{batch}{Split kappa computation by this variable. Similar to slide_id.}
 }
 \description{
-Fits a gamma mixture model to aid clustering of mIF imaging data
+This function can compare the agreement of classification result against a gold/silver standard.
+The result can be returned as in either a data frame of Cohen's Kappa or a side-by-side box plot.
 }
 \details{
 Plot a histogram of a gluster model. Plots one model.

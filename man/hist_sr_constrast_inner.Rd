@@ -2,7 +2,7 @@
 % Please edit documentation in R/histograms.R
 \name{hist_sr_constrast_inner}
 \alias{hist_sr_constrast_inner}
-\title{Fits a gamma mixture model to aid clustering of mIF imaging data}
+\title{Histogram contrast (inner function, not shown)}
 \usage{
 hist_sr_constrast_inner(
   fit1,
@@ -27,7 +27,7 @@ hist_sr_constrast_inner(
 \item{...}{Arguments passed to plot.gluster}
 }
 \description{
-Fits a gamma mixture model to aid clustering of mIF imaging data
+Histogram contrast (inner function, not shown)
 }
 \details{
 Plot a histogram of a gluster model. Plots one model.

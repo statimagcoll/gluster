@@ -2,7 +2,7 @@
 % Please edit documentation in R/histograms.R
 \name{plot.gluster}
 \alias{plot.gluster}
-\title{Fits a gamma mixture model to aid clustering of mIF imaging data}
+\title{Histogram of data with density curve}
 \usage{
 \method{plot}{gluster}(
   x,
@@ -50,8 +50,12 @@
 
 \item{...}{Arguments passed to cfGMM function}
 }
+\value{
+This function gives a plot of histogram and optional fitted curve from a gluster object.
+}
 \description{
-Fits a gamma mixture model to aid clustering of mIF imaging data
+This plot funtion can plot the histogram of the data and with the addition of density
+curve (optional) overlay on top the histogram.
 }
 \details{
 Plot a histogram of a gluster model. Plots one model.

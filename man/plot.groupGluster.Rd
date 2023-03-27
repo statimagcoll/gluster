@@ -2,7 +2,7 @@
 % Please edit documentation in R/groupGluster.R
 \name{plot.groupGluster}
 \alias{plot.groupGluster}
-\title{Fits a gamma mixture model to mIF imaging data with multiple slides at one time}
+\title{Plot function of fitted model in groupGluster object}
 \usage{
 \method{plot}{groupGluster}(
   x,
@@ -45,9 +45,8 @@
 \item{...}{Arguments passed to XX}
 }
 \description{
-Takes a cfGMM model and forces the right-most component
-probabilities to be monotonic increasing with respect
-to the input values.
+Takes a slide and marker input, and returns the corresponding histogram of expression value,
+along with fitted density curve.
 }
 \details{
 Various diagnostic and QC plots for groupGluster fits.

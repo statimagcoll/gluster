@@ -29,10 +29,13 @@ groupGluster(
 
 \item{...}{Arguments passed to gluster.}
 }
+\value{
+Analogous to gluster, groupGluster simpky returns lists in the name of slides, each list being corresponding gluster object.
+}
 \description{
 Takes a cfGMM model and forces the right-most component
 probabilities to be monotonic increasing with respect
-to the input values.
+to the input values. Apply this model to multiple slides with multiple channels.
 }
 \details{
 Fits cfGMM models to each marker channel in a matrix of marker channels for multiple slides

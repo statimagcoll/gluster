@@ -23,6 +23,14 @@ gluster(
 
 \item{...}{Arguments passed to cfGMM function}
 }
+\value{
+\item{expressionZ}{The monotone proportional density of second component}
+\item{expressionX}{The input expression value}
+\item{expressionW}{The raw proportional density of second component}
+\item{params}{The monotone proportional density of second component}
+\item{fit}{cfGMM::cfGMM fitting output}
+\item{subBatch}{same as the subBatch in the argument}
+}
 \description{
 Takes a cfGMM model and forces the right-most component
 probabilities to be monotonic increasing with respect

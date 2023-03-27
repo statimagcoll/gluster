@@ -1,12 +1,11 @@
-#' Fits a gamma mixture model to aid clustering of mIF imaging data
+#' Checks convergence of gluster/groupGluster object
 #'
-#' Takes a cfGMM model and forces the right-most component
-#' probabilities to be monotonic increasing with respect
-#' to the input values.
+#' This needs to be run before any plot of fitted result being made.
 #'
 #' @param gluster.fit gluster or groupGluster object.
 #' @param out.all Whether to print out the full convergence result for all markers and slides, or just summary of non-convergence.
 #' @param return.result Whether to return the convergence result into an object.
+#' @return Returns simple printout or dataframe of convergence result, depending on argument input.
 #' @importFrom reactable reactable
 #' @export
 #' @details convergence check to gluster or batch gluster fits
@@ -38,6 +37,10 @@ convCheck <- function(gluster.fit, out.all=FALSE, return.result=FALSE){
 }
 
 #' Diagnostic plot - contrast
+#'
+#' This can be seen as an overlay of the scatter plot diagnostic plot. While side-by-side comparison of the plots
+#' might have scale problem, "overlay" the scatter plot resolves this issue. The corresponding slides are also connected
+#' with dashed line, making the changes easier to spot.
 #'
 #' @param fit1 A groupGluster object.
 #' @param fit2 Another groupGluster object, possibly that is a refit of fit1 with updated constraints.

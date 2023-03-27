@@ -2,7 +2,7 @@
 % Please edit documentation in R/histograms.R
 \name{hist_sr_constrast}
 \alias{hist_sr_constrast}
-\title{Fits a gamma mixture model to aid clustering of mIF imaging data}
+\title{Contrastive density curve on histogram}
 \usage{
 hist_sr_constrast(
   fit1,
@@ -30,7 +30,7 @@ hist_sr_constrast(
 \item{...}{Arguments passed to plot.gluster}
 }
 \description{
-Fits a gamma mixture model to aid clustering of mIF imaging data
+This function can compare two fitted model of a marker on a slide, from gluster/groupGluster object.
 }
 \details{
 Plot histogram constrast of two gluster or groupGluster model. Plots one model.

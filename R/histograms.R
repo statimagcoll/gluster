@@ -1,6 +1,7 @@
-#' Fits a gamma mixture model to aid clustering of mIF imaging data
+#' Histogram of data with density curve
 #'
-#'
+#' This plot funtion can plot the histogram of the data and with the addition of density
+#' curve (optional) overlay on top the histogram.
 #' @param x A gluster object.
 #' @param marker Marker to be plotted, defaults to the first one.
 #' @param subBatch subBatch to be plotted, defaults to the first one.
@@ -15,6 +16,7 @@
 #' @param print logical whether to print the plot.
 #' @param title Title of plot.
 #' @param ... Arguments passed to cfGMM function
+#' @return This function gives a plot of histogram and optional fitted curve from a gluster object.
 #' @importFrom stats dgamma
 #' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom
 #' @importFrom rlang UQ
@@ -75,7 +77,7 @@ plot.gluster <- function(x, marker=1, subBatch=1, zero_include=FALSE, breaks=40,
 }
 
 
-#' Fits a gamma mixture model to aid clustering of mIF imaging data
+#' Histogram contrast (inner function, not shown)
 #'
 #'
 #' @param fit1 A gluster object.
@@ -106,9 +108,9 @@ hist_sr_constrast_inner <- function(fit1, fit2, marker=1, subBatch=1, title=NULL
   print(p)
 }
 
-#' Fits a gamma mixture model to aid clustering of mIF imaging data
+#' Contrastive density curve on histogram
 #'
-#'
+#' This function can compare two fitted model of a marker on a slide, from gluster/groupGluster object.
 #' @param fit1 A gluster or groupGluster object.
 #' @param fit2 Another gluster or groupGluster object, possibly that is a refit of fit1 with updated constraints. Has to be of the same class as fit1.
 #' @param marker Marker to be plotted, defaults to the first one.
@@ -124,7 +126,7 @@ hist_sr_constrast_inner <- function(fit1, fit2, marker=1, subBatch=1, title=NULL
 #' @details Plot histogram constrast of two gluster or groupGluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
 hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=NULL, ...){
-  if(class(fit1)!=class(fit2)){
+  if(any(class(fit1)!=class(fit2))){
     print("Two objects are not of same class! Please change input.")
     } else if (class(fit1)[1]=="gluster"){
       marker.name <- names(fit1[[1]])[marker]
@@ -135,9 +137,10 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=N
 }
 
 
-#' Fits a gamma mixture model to aid clustering of mIF imaging data
+#' Compare binary classification result using Cohen's Kappa
 #'
-#'
+#' This function can compare the agreement of classification result against a gold/silver standard.
+#' The result can be returned as in either a data frame of Cohen's Kappa or a side-by-side box plot.
 #' @param ... Matrices to compare to standard labels. Rows are cells, columns are markers.
 #' @param standard A matrix indicating gold/silver standard positive cells.
 #' @param batch Split kappa computation by this variable. Similar to slide_id.

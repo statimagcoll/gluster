@@ -2,7 +2,7 @@
 #'
 #' Takes a cfGMM model and forces the right-most component
 #' probabilities to be monotonic increasing with respect
-#' to the input values.
+#' to the input values. Apply this model to multiple slides with multiple channels.
 #'
 #' @param expressionMarkers An ncell by nmarker matrix of expression values. Assumed to be coarsely normalized and transformed.
 #' @param slide Single vector of length n. Identifies slide number for each cell.
@@ -11,6 +11,7 @@
 #' @param qboundaryMarkers A nmarker list of 4x4 matrices giving the qauntile boundaries for the modes for the unexpressed and expressed cell distributions.
 #' @param n.cores Number of cores. Default to one less than the number of cores available on the machine.
 #' @param ... Arguments passed to gluster.
+#' @return Analogous to gluster, groupGluster simpky returns lists in the name of slides, each list being corresponding gluster object.
 #' @importFrom cfGMM cfGMM
 #' @importFrom stats quantile
 #' @importFrom reactable reactable
@@ -26,11 +27,10 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
   return(constrCfGMMbunch)
 }
 
-#' Fits a gamma mixture model to mIF imaging data with multiple slides at one time
+#' Plot function of fitted model in groupGluster object
 #'
-#' Takes a cfGMM model and forces the right-most component
-#' probabilities to be monotonic increasing with respect
-#' to the input values.
+#' Takes a slide and marker input, and returns the corresponding histogram of expression value,
+#' along with fitted density curve.
 #'
 #' @param x A groupGluster object
 #' @param marker Select which marker to plot. Can be a character or integer.
