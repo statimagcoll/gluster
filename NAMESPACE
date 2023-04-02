@@ -2,6 +2,7 @@
 
 S3method(plot,gluster)
 S3method(plot,groupGluster)
+export(collateGroupGluster)
 export(convCheck)
 export(diag_contrast)
 export(evaluateGroupGluster)

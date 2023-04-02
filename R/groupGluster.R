@@ -135,3 +135,30 @@ plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnosti
   }
   }
 }
+
+#' Binds groupGluster
+#'
+#'
+#' Extends the c() for groupGluster object
+#'
+#' @param ... groupGluster objects.
+#' @return Analogous to gluster, groupGluster simpky returns lists in the name of slides, each list being corresponding gluster object.
+#' @importFrom cfGMM cfGMM
+#' @importFrom stats quantile
+#' @importFrom reactable reactable
+#' @importFrom parallel mclapply detectCores
+#' @export
+#' @details Fits cfGMM models to each marker channel in a matrix of marker channels for multiple slides
+collateGroupGluster <- function(...){
+  input.list = list(...)
+  out.list <- list()
+  for(i in 1:length(input.list)){
+    obj.i <- input.list[[i]]
+    for(j in 1:length(obj.i)){
+      out.list <- append(out.list, list(obj.i[[j]]))
+      names(out.list)[[length(out.list)]] <- names(obj.i)[j]
+    }
+  }
+  class(out.list) = c('groupGluster', class(constrCfGMMbunch))
+  return(out.list)
+}
