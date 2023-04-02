@@ -137,7 +137,7 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=N
 }
 
 
-#' Compare binary classification result using Cohen's Kappa
+#' Compare binary classification result using Cohen's Kappa or Adjusted Rand Index
 #'
 #' This function can compare the agreement of classification result against a gold/silver standard.
 #' The result can be returned as in either a data frame of Cohen's Kappa or a side-by-side box plot.

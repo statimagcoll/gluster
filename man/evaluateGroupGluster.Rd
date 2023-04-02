@@ -2,7 +2,7 @@
 % Please edit documentation in R/histograms.R
 \name{evaluateGroupGluster}
 \alias{evaluateGroupGluster}
-\title{Compare binary classification result using Cohen's Kappa}
+\title{Compare binary classification result using Cohen's Kappa or Adjusted Rand Index}
 \usage{
 evaluateGroupGluster(..., standard, batch, method = c("cohen", "rand"))
 }
