@@ -144,52 +144,59 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=N
 #' @param ... Matrices to compare to standard labels. Rows are cells, columns are markers.
 #' @param standard A matrix indicating gold/silver standard positive cells.
 #' @param batch Split kappa computation by this variable. Similar to slide_id.
+#' @param method "cohen" the default, calculates cohen's kappa; "rand" calculates adjusted rand index.
 #' @importFrom stats dgamma
-#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_boxplot coord_flip
+#' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_boxplot coord_flip ylab xlab
 #' @importFrom rlang UQ
 #' @importFrom hrbrthemes theme_ipsum
 #' @importFrom gridExtra tableGrob
 #' @importFrom stats na.omit density
 #' @importFrom reshape2 melt
+#' @importFrom fossil adj.rand.index
 #' @export
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-kappaGroupGluster = function(..., standard, batch){
+evaluateGroupGluster = function(..., standard, batch, method=c("cohen", "rand")){
   standard = as.data.frame(standard)
   # cohen's kappa
   x = lapply(list(...), as.data.frame)
   # check all dimensions match
   markers = colnames(standard)
 
-  # Compute kappa for each method, slide, and marker
-  cohen.kappa.df = lapply(x, function(xmat, standard, batch){
-    result2 = as.data.frame(t(mapply(function(sxmat, sstandard){
-      result = mapply(function(xv, yv){
-        po=table(xv, yv)
-        po = po/sum(po)
-        pe=sum(rowSums(po) * colSums(po))
-        po=sum(po[c(1,4)])
-        (po-pe)/(1-pe)  }, xv=sxmat, yv=sstandard)
-      #result$method = if(!is.null(rownames(result))) rownames(result) else
-      return(result)
-    }, sxmat=split(xmat, batch), sstandard=split(standard, batch) ) ))
-    result2$batch = rownames(result2)
-    result2
-  }, standard=standard, batch=batch)
+
+    # Compute kappa for each method, slide, and marker
+    idx.df = lapply(x, function(xmat, standard, batch){
+      result2 = as.data.frame(t(mapply(function(sxmat, sstandard){
+        result = mapply(function(xv, yv){
+          if(method=="cohen"){po=table(xv, yv)
+          po = po/sum(po)
+          pe=sum(rowSums(po) * colSums(po))
+          po=sum(po[c(1,4)])
+          (po-pe)/(1-pe)} else if (method=="rand"){
+            adj.rand.index((xv+1), (yv+1))
+          }  }, xv=sxmat, yv=sstandard)
+        #result$method = if(!is.null(rownames(result))) rownames(result) else
+        return(result)
+      }, sxmat=split(xmat, batch), sstandard=split(standard, batch) ) ))
+      result2$batch = rownames(result2)
+      result2
+    }, standard=standard, batch=batch)
+
+
   method.names <- names(list(...))
-  if(is.null(method.names)) method.names=paste0('method', 1:length(cohen.kappa.df))
-  names(cohen.kappa.df)=method.names
-  cohen.kappa.df = lapply(names(cohen.kappa.df), function(xname){res=cohen.kappa.df[[xname]]; names(res) = c(markers, 'batch'); res$method=xname; res})
-  cohen.kappa.df = do.call(rbind,  cohen.kappa.df)
-  colnames(cohen.kappa.df)[1:length(markers)] <- markers
-  cohen.kappa.plot <- melt(cohen.kappa.df, id.vars = c("batch", "method"), variable.name = "marker",
-                           value.name = "Cohen.Kappa")
+  if(is.null(method.names)) method.names=paste0('method', 1:length(idx.df))
+  names(idx.df)=method.names
+  idx.df = lapply(names(idx.df), function(xname){res=idx.df[[xname]]; names(res) = c(markers, 'batch'); res$method=xname; res})
+  idx.df = do.call(rbind,  idx.df)
+  colnames(idx.df)[1:length(markers)] <- markers
+  idx.plot <- melt(idx.df, id.vars = c("batch", "method"), variable.name = "marker",
+                           value.name = "idx.method")
 
-
+  ttl <- ifelse(method=="cohen", "Cohen's Kappa \ncompared to Silver Standard", "Adjusted Rand Index \ncomparedto Silver Standard")
   p <- ggplot() + theme_ipsum(plot_title_size = 10,base_size = 8)  + coord_flip()+
-     geom_boxplot(data=cohen.kappa.plot, aes(x=marker, y=Cohen.Kappa, fill=method), width=0.7, alpha=0.3)+ggtitle("Cohen's Kappa compared\nto Silver Standard")+xlab("Marker")
+     geom_boxplot(data=idx.plot, aes(x=marker, y=idx.method, fill=method), width=0.7, alpha=0.3)+ggtitle(ttl)+xlab("Marker")+ylab(method)
   print(p)
-  return(cohen.kappa.df)
+  return(idx.df)
 }
 
 #' Get mode from parameters

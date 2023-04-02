@@ -9,7 +9,7 @@ Description: Tools for using closed-form gamma mixture models for fitting cell e
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.3)
+Depends: R (>= 3.5.0)
 Collate:
     'gluster.R'
     'histograms.R'
@@ -26,7 +26,8 @@ Imports:
   parallel,
   reactable,
   plotly,
-  reshape2
+  reshape2,
+  fossil
 RoxygenNote: 7.2.3
 Suggests: 
     knitr,
