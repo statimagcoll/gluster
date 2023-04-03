@@ -16,7 +16,7 @@ vignette: >
 library(ggplot2)
 cell = readRDS('/media/disk2/atlas_mxif/data/threshold_quantification_global_20230315.rds')
 #allMarkers = grep('^Median_Cell_', names(cell), value=TRUE)
-allMarkers <- c("CD3D", "CD4", "CD8", "CD68", "CD20", "CD11B", "FOXP3", "LYSOZYME", "DAPI")
+allMarkers <- c("CD3D", "CD4", "CD8", "CD68", "CD20", "CD11B", "FOXP3", "LYSOZYME", "DAPI", "CD45", "MUC5AC", 'BCATENIN', 'PANCK')
 allMarkers = paste0("Median_Cell_", allMarkers)
 cell$slide_id = cell$SlideID
 
@@ -50,28 +50,7 @@ Before fitting the model, we apply a basic normalization and set some boundary c
 library(gluster)
 # normalize the data 
 nzNormedMarkers = paste0('nzNorm_',allMarkers)
-cell = do.call(rbind, lapply(split(cell, cell$slide_id), function(df){df[,nzNormedMarkers] = log10(1+sweep(df[,allMarkers], 2, colMeans(df[,allMarkers], na.rm = TRUE ), FUN = '/' ) ); df }) ) # replace(df[,allMarkers], df[,allMarkers]==0, NA)
-
-
-quantileBoundaries = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.6, .8, 1), byrow = TRUE, nrow=2),
-                          matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
-                          NULL,
-                          NULL,
-                          NULL,
-                          NULL)
-boundaries = list(matrix(c(0,.3, .5, 1), byrow = TRUE, nrow=2),
-                  NULL,
-                  NULL,
-                  NULL,
-                  matrix(c(0,.3, .45, Inf), byrow = TRUE, nrow=2),
-                  matrix(c(0,.3, .5, Inf), byrow = TRUE, nrow=2),
-                  matrix(c(0,.4, .45, Inf), byrow = TRUE, nrow=2),
-                  NULL,
-                  NULL)
-names(quantileBoundaries) = names(boundaries) = nzNormedMarkers
+cell = do.call(rbind, lapply(split(cell, cell$slide_id), function(df){df[,nzNormedMarkers] = log10(1+sweep(df[,allMarkers], 2, colMeans(replace(df[,allMarkers], df[,allMarkers]==0, NA), na.rm = TRUE ), FUN = '/' ) ); df }) ) # 
 ```
 
 The code below fits the model in the first slide.
@@ -106,6 +85,10 @@ quantileBoundaries2 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           NULL,
                           NULL,
                           NULL,
+                          NULL,
+                          NULL,
+                          NULL,
+                          NULL,
                           NULL)
 boundaries2 = list(NULL,
                   matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
@@ -115,7 +98,11 @@ boundaries2 = list(NULL,
                   matrix(c(-Inf,.3, .75, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .5, Inf), byrow = TRUE, nrow=2),
-                  matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2))
+                  matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2),
+                  NULL,
+                  NULL,
+                  NULL,
+                  NULL)
 names(quantileBoundaries2) = names(boundaries2) = nzNormedMarkers
 #constrGMMfit2 = gluster(cells[,nzNormedMarkers], boundaryMarkers = boundaries2,
 #                 qboundaryMarkers=quantileBoundaries2)
@@ -144,31 +131,17 @@ trash = sapply(unique(cells[[1]]$sample_id), function(x) plot.gluster(batchConst
 
 We can use `groupGluster` to run gluster on multiple slides. We start with the second round of boundaries that we chose from the first batch and run it on the same number of cores as slides. Each slide will be assigned to a separate core. The same boundaries are used for all the slides.
 
-```{r, batchFit, eval=FALSE}
+```{r, batchFit, eval=TRUE}
 constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries2, qboundaryMarkers = quantileBoundaries2, n.cores = 12)
 saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds')
-
-
-# debugging gluster
-# for(i in unique(cell$slide_id)){
-#   cat(i,'\n')
-#   test = gluster(cell[cell$slide_id==i,nzNormedMarkers], boundaryMarkers=boundaries2, qboundaryMarkers = quantileBoundaries2)
-# }
-
-# library(reactable)
-# convergenceTab = sapply(constrCfGMMbunch, function(x) sapply(x$fit, function(y){ y$convergence}))
-# # the model converged for most slides
-# rowMeans(convergenceTab)
-# reactable(convergenceTab)
-
-
 ```
 
 
-# Visualizing the fitted distributions {.tabset}
+# Visualizing the fitted distributions
 
+::: {.panel-tabset}
 
-```{r, results='asis', fig.width=8, fig.height=3, warning=FALSE}
+```{r, results='asis', fig.width=8, fig.height=3, warning=FALSE, eval=FALSE}
 constrCfGMMbunch = readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds')
 for(marker in names(boundaries)){
   cat('\n## ', marker, '\n')
@@ -178,6 +151,7 @@ for(marker in names(boundaries)){
 }
 ```
 
+:::
 
 # Adjusting the boundaries
 
@@ -193,6 +167,7 @@ quantileBoundaries3 = list(matrix(c(0,.8, .9, 1), byrow = TRUE, nrow=2),
                           matrix(c(0,.7, .8, 1), byrow = TRUE, nrow=2),
                           NULL,
                           NULL,
+                          NULL,
                           NULL)
 # might look more like the manual labels
 boundaries3 = list(matrix(c(-Inf,.3, .8, Inf), byrow = TRUE, nrow=2),
@@ -202,6 +177,7 @@ boundaries3 = list(matrix(c(-Inf,.3, .8, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .45, 1), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .4, .75), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .45, Inf), byrow = TRUE, nrow=2),
+                  matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2),
                   NULL)
 
 # better fit to distribution
@@ -212,11 +188,12 @@ boundaries4 = list(matrix(c(-Inf,.3, .5, Inf), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .45, 1), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.3, .4, .75), byrow = TRUE, nrow=2),
                   matrix(c(-Inf,.4, .45, Inf), byrow = TRUE, nrow=2),
-                  matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2))
+                  matrix(c(-Inf,.4, .4, Inf), byrow = TRUE, nrow=2),
+                  NULL)
 ```
 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 constrCfGMMbunch = groupGluster(cell[,nzNormedMarkers], slide=cell$slide_id, boundaryMarkers=boundaries3, qboundaryMarkers = quantileBoundaries3, n.cores = 12)
 saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit2.rds')
 
@@ -225,14 +202,17 @@ saveRDS(constrCfGMMbunch, file='/media/disk2/atlas_mxif/data/cfGMM_cody_fit3.rds
 ```
 
 
+
 # The new fitted distributions {.tabset}
 
+
 ```{r, results='asis', fig.width=8, fig.height=3, warning=FALSE}
-constrCfGMMbunch = readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit3.rds')
+constrCfGMMbunch = readRDS('/media/disk2/atlas_mxif/data/cfGMM_cody_fit.rds')
 marker = 2
 for(marker in names(boundaries)){
   cat('\n## ', marker, '\n')
   plot(constrCfGMMbunch, marker=marker)
+  #lapply(names(constrCfGMMbunch), function(nm) plot(constrCfGMMbunch, slide=nm, marker=marker, histogram=TRUE) )
   invisible(capture.output(sapply(names(constrCfGMMbunch), function(x) plot(constrCfGMMbunch[[x]], marker = marker, title = x, tabl=TRUE ) ))) # boundary = quantile(constrCfGMMbunch[[marker]]$expressionX[,1], probs=quantileBoundaries[[marker]][2,1]), 
   cat('\n\n')
 }
@@ -263,7 +243,7 @@ merged = unsplit(lapply(names(constrCfGMMbunch), function(x){
 cell[,names(merged)] = merged
 
 merged = unsplit(lapply(names(constrCfGMMbunch), function(x){
-  constrCfGMMbunch[[x]]$expressionZ<-as.data.frame(constrCfGMMbunch[[x]]$expressionW>0.5)
+  constrCfGMMbunch[[x]]$expressionW<-as.data.frame(constrCfGMMbunch[[x]]$expressionW>0.5)
   names(constrCfGMMbunch[[x]]$expressionW) = paste0('cfGMMPhenoMarg_', names(constrCfGMMbunch[[x]]$expressionW))
   rownames(constrCfGMMbunch[[x]]$expressionW) = paste0(x, rownames(constrCfGMMbunch[[x]]$expressionW))
   constrCfGMMbunch[[x]]$expressionW}), cell$slide_id)
