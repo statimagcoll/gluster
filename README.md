@@ -1,7 +1,7 @@
 Guide for using Gluster in semi-automated cell gating
 ================
 Ruby Xiong and Simon Vandekar
-2023-03-27
+2023-04-02
 
 # gluster
 
@@ -10,8 +10,32 @@ Gamma Mixture Models for Multiplexed Immunofluorescence Imaging Data
 Install Package
 
 ``` r
-# if( !require(devtools) ) install.packages("devtools")
-# devtools::install_github( "statimagcoll/gluster" )
+if( !require(devtools) ) install.packages("devtools")
+devtools::install_github( "statimagcoll/gluster" )
+```
+
+    ## Downloading GitHub repo statimagcoll/gluster@HEAD
+
+    ## gdtools (0.3.2 -> 0.3.3) [CRAN]
+
+    ## Installing 1 packages: gdtools
+
+    ## 
+    ## The downloaded binary packages are in
+    ##  /var/folders/lf/krz2s0js7jj03g10q52y5mhc0000gn/T//RtmpMZHwA0/downloaded_packages
+    ## ── R CMD build ─────────────────────────────────────────────────────────────────
+    ##      checking for file ‘/private/var/folders/lf/krz2s0js7jj03g10q52y5mhc0000gn/T/RtmpMZHwA0/remotes14c4a4173fbdc/statimagcoll-gluster-5c5c987/DESCRIPTION’ ...  ✔  checking for file ‘/private/var/folders/lf/krz2s0js7jj03g10q52y5mhc0000gn/T/RtmpMZHwA0/remotes14c4a4173fbdc/statimagcoll-gluster-5c5c987/DESCRIPTION’
+    ##   ─  preparing ‘gluster’:
+    ##      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
+    ##   ─  checking for LF line-endings in source and make files and shell scripts
+    ##   ─  checking for empty or unneeded directories
+    ##      Removed empty directory ‘gluster/vignettes’
+    ##    Omitted ‘LazyData’ from DESCRIPTION
+    ##   ─  building ‘gluster_0.1.0.tar.gz’
+    ##      
+    ## 
+
+``` r
 library(gluster)
 ```
 
@@ -217,17 +241,18 @@ for(i in nzNormedMarkers){
 
 ![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
 
-### Cohen’s Kappa
+### evaluation
 
 To compare agreement between two binomial variables, we can use cohen’s
-kappa. Here is the usage of the function with simulated data:
+kappa or rand index. Here is the usage of the function with simulated
+data:
 
 ``` r
 test1 <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
 test2 <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
 standard.mat <- matrix(sample(c(0,1),400, replace = TRUE), nrow=200)
 colnames(test1) <- colnames(test2) <- colnames(standard.mat) <- c("a", "b")
-kappaGroupGluster(test1, test2, standard=standard.mat, batch=rep(1:5, each=10))
+evaluateGroupGluster(test1, test2, standard=standard.mat, method="cohen",batch=rep(1:5, each=10))
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
@@ -243,3 +268,21 @@ kappaGroupGluster(test1, test2, standard=standard.mat, batch=rep(1:5, each=10))
     ## 31  0.13253012 -0.25000000     3 method2
     ## 41 -0.26903553  0.19799499     4 method2
     ## 51 -0.22448980  0.07317073     5 method2
+
+``` r
+evaluateGroupGluster(test1, test2, standard=standard.mat, method="rand",batch=rep(1:5, each=10))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+    ##             a           b batch  method
+    ## 1  0.03789224 0.037892244     1 method1
+    ## 2  0.02271383 0.038423606     2 method1
+    ## 3  0.02473150 0.016257759     3 method1
+    ## 4  0.01578532 0.002920169     4 method1
+    ## 5  0.02344027 0.015481708     5 method1
+    ## 11 0.01578532 0.016257759     1 method2
+    ## 21 0.02271383 0.015785320     2 method2
+    ## 31 0.01528449 0.037892244     3 method2
+    ## 41 0.03842361 0.014859985     4 method2
+    ## 51 0.01561761 0.022471910     5 method2

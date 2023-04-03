@@ -27,14 +27,14 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
   return(constrCfGMMbunch)
 }
 
-#' Plot function of fitted model in groupGluster object
+#' Inner: Plot function of fitted model in groupGluster object
 #'
 #' Takes a slide and marker input, and returns the corresponding histogram of expression value,
 #' along with fitted density curve.
 #'
 #' @param x A groupGluster object
-#' @param marker Select which marker to plot. Can be a character or integer.
-#' @param slide Select which slide to plot. Can be a character or integer.
+#' @param marker Select which markers to plot. Can be a vector of character or integer. If not specified, will print all.
+#' @param slide Select which slides to plot. Can be a vector of character or integer. If not specified, will print all.
 #' @param component Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.
 #' @param diagnostic logical indicating whether to create the diagnostic plot. Default value is TRUE.
 #' @param interactive logical indicating whether diagnostic plot should be interactive.
@@ -49,9 +49,8 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @importFrom stats na.omit
 #' @importFrom utils capture.output
 #' @importFrom plotly plot_ly layout
-#' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
-plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE,
+plotGroupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE,
                               histogram=FALSE, title=NULL, boundary = NULL,color='grey', print=TRUE, ...){
   markerind = marker
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
@@ -84,4 +83,82 @@ plot.groupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE
   }
   if(histogram)
     invisible(capture.output(plot(x[[slide]], marker = markerind, title = title, boundary=boundary)))
+}
+
+#' Plot function of fitted model in groupGluster object
+#'
+#' Takes a slide and marker input, and returns the corresponding histogram of expression value,
+#' along with fitted density curve.
+#'
+#' @param x A groupGluster object
+#' @param marker Select which markers to plot. Can be a vector of character or integer. If not specified, will print all.
+#' @param slide Select which slides to plot. Can be a vector of character or integer. If not specified, will print all.
+#' @param component Integer specifying which component to plot, 1 is unexpressed nonzero cells, 2 is expressed cells.
+#' @param diagnostic logical indicating whether to create the diagnostic plot. Default value is TRUE.
+#' @param interactive logical indicating whether diagnostic plot should be interactive.
+#' @param histogram logical indicating whether to create the slide histograms.
+#' @param title Title for the plot. Default is the marker name.
+#' @param boundary Boundary (vertial dashed line) to be plotted on the histogram.
+#' @param color color for points.
+#' @param print logical whether to display the plot. Default value TRUE.
+#' @param ... Arguments passed to XX
+#' @importFrom ggplot2 aes ggplot ggtitle stat_function geom_vline unit annotation_custom geom_point xlab ylab
+#' @importFrom hrbrthemes theme_ipsum
+#' @importFrom stats na.omit
+#' @importFrom utils capture.output
+#' @importFrom plotly plot_ly layout
+#' @export
+#' @details Various diagnostic and QC plots for groupGluster fits.
+plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnostic=TRUE, interactive=FALSE,
+                             histogram=FALSE, title=NULL, boundary = NULL,color='grey', print=TRUE, ...){
+  if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
+  if(diagnostic){
+    if(is.null(marker)){markern=names(x[[1]][[1]])}else{markern=marker}
+    lapply(as.list(markern), function(mkr)plotGroupGluster(x, marker=mkr, diagnostic=TRUE, interactive = interactive, histogram=FALSE, title=mkr))
+  }
+  if(histogram){
+    if(is.null(marker) | is.null(slide)){
+      if(is.null(marker))marker=names(x[[1]][[1]])
+      if(is.null(slide))slide=names(x)
+      ms=expand.grid(marker, slide)
+      marker=ms[,1];slide=ms[,2]
+      if(is.null(title))title=paste0(slide, "\n", marker)}
+    for(i in 1:length(marker)){
+      marker.i <- as.character(marker[i])
+      slide.i <- as.character(slide[i])
+      title.i <- title[i]
+      if(is.null(boundary)){
+        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL)
+      } else {
+        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i])
+      }
+  }
+  }
+}
+
+#' Binds groupGluster
+#'
+#'
+#' Extends the c() for groupGluster object
+#'
+#' @param ... groupGluster objects.
+#' @return Analogous to gluster, groupGluster simpky returns lists in the name of slides, each list being corresponding gluster object.
+#' @importFrom cfGMM cfGMM
+#' @importFrom stats quantile
+#' @importFrom reactable reactable
+#' @importFrom parallel mclapply detectCores
+#' @export
+#' @details Fits cfGMM models to each marker channel in a matrix of marker channels for multiple slides
+collateGroupGluster <- function(...){
+  input.list = list(...)
+  out.list <- list()
+  for(i in 1:length(input.list)){
+    obj.i <- input.list[[i]]
+    for(j in 1:length(obj.i)){
+      out.list <- append(out.list, list(obj.i[[j]]))
+      names(out.list)[[length(out.list)]] <- names(obj.i)[j]
+    }
+  }
+  class(out.list) = c('groupGluster', class(constrCfGMMbunch))
+  return(out.list)
 }
