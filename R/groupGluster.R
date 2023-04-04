@@ -114,7 +114,7 @@ plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnosti
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(diagnostic){
     if(is.null(marker)){markern=names(x[[1]][[1]])}else{markern=marker}
-    lapply(as.list(markern), function(mkr)plotGroupGluster(x, marker=mkr, diagnostic=TRUE, interactive = interactive, histogram=FALSE, title=mkr))
+    lapply(as.list(markern), function(mkr)plotGroupGluster(x, marker=mkr, diagnostic=TRUE, interactive = interactive, histogram=FALSE,print=print, title=mkr))
   }
   if(histogram){
     if(is.null(marker) | is.null(slide)){
