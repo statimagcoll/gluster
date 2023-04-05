@@ -99,7 +99,7 @@ glusterX = function(x, constraints=NULL, subBatch=NULL, nn0=200, ...){
     fit = list(posterior=matrix(NA, nrow=sum(!zeroInds, na.rm=TRUE), ncol=2),
                lambda=rep(NA,2),
                gamma.pars=matrix(NA, nrow=2, ncol=2, dimnames=list(c('alpha', 'beta'))),
-               convergence=FALSE)
+               convergence=NA)
   }
 
   post.prob <- data.frame(factor=subBatch[!naInds & !zeroInds], value=fit$posterior)
