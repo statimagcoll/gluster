@@ -81,8 +81,14 @@ plotGroupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE,
       return(p1)
     }
   }
-  if(histogram)
-    invisible(capture.output(plot(x[[slide]], marker = markerind, title = title, boundary=boundary, tabl=tabl)))
+  if(histogram){
+    p <- plot(x[[slide]], marker = markerind, title = title, boundary=boundary, tabl=tabl)
+    if(print){
+      print(p)
+    } else {
+      return(p)
+    }
+  }
 }
 
 #' Plot function of fitted model in groupGluster object
@@ -131,9 +137,9 @@ plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnosti
       slide.i <- as.character(slide[i])
       title.i <- title[i]
       if(is.null(boundary)){
-        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL, tabl=tabl)
+        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL, tabl=tabl, print = print)
       } else {
-        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i], tabl=tabl)
+        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i], tabl=tabl, print = print)
       }
   }
   }
