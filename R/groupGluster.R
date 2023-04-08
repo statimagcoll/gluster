@@ -132,16 +132,20 @@ plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnosti
       ms=expand.grid(marker, slide)
       marker=ms[,1];slide=ms[,2]
       if(is.null(title))title=paste0(slide, "\n", marker)}
+    ps <- list()
     for(i in 1:length(marker)){
       marker.i <- as.character(marker[i])
       slide.i <- as.character(slide[i])
       title.i <- title[i]
       if(is.null(boundary)){
-        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL, tabl=tabl, print = print)
+        ps[[i]] <- plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL, tabl=tabl)
       } else {
-        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i], tabl=tabl, print = print)
+        ps[[i]] <- plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i], tabl=tabl)
       }
-  }
+    }
+    if(print){
+      lapply(ps, print)
+    } else {return(ps)}
   }
 }
 
