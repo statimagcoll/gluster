@@ -82,7 +82,7 @@ plotGroupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE,
     }
   }
   if(histogram){
-    p <- plot(x[[slide]], marker = markerind, title = title, boundary=boundary, tabl=tabl)
+    p <- plot(x[[slide]], marker = markerind, title = title, boundary=boundary, tabl=tabl, print=FALSE)
     if(print){
       print(p)
     } else {
