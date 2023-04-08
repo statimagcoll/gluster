@@ -16,6 +16,7 @@
   boundary = NULL,
   color = "grey",
   print = TRUE,
+  tabl = FALSE,
   ...
 )
 }

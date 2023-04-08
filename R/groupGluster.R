@@ -51,7 +51,7 @@ groupGluster <- function(expressionMarkers, slide, boundaryMarkers=NULL, qbounda
 #' @importFrom plotly plot_ly layout
 #' @details Various diagnostic and QC plots for groupGluster fits.
 plotGroupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE, interactive=FALSE,
-                              histogram=FALSE, title=NULL, boundary = NULL,color='grey', print=TRUE, ...){
+                              histogram=FALSE, title=NULL, boundary = NULL,color='grey', print=TRUE, tabl=FALSE,  ...){
   markerind = marker
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(diagnostic){
@@ -82,7 +82,7 @@ plotGroupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE,
     }
   }
   if(histogram)
-    invisible(capture.output(plot(x[[slide]], marker = markerind, title = title, boundary=boundary)))
+    invisible(capture.output(plot(x[[slide]], marker = markerind, title = title, boundary=boundary, tabl=tabl)))
 }
 
 #' Plot function of fitted model in groupGluster object
@@ -110,7 +110,7 @@ plotGroupGluster <- function(x, marker=1, slide=1, component=2, diagnostic=TRUE,
 #' @export
 #' @details Various diagnostic and QC plots for groupGluster fits.
 plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnostic=TRUE, interactive=FALSE,
-                             histogram=FALSE, title=NULL, boundary = NULL,color='grey', print=TRUE, ...){
+                             histogram=FALSE, title=NULL, boundary = NULL,color='grey', print=TRUE, tabl=FALSE, ...){
   if(is.numeric(marker)){marker=colnames(x[[1]][["expressionX"]])[marker] }
   if(diagnostic){
     if(is.null(marker)){markern=names(x[[1]][[1]])}else{markern=marker}
@@ -131,9 +131,9 @@ plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnosti
       slide.i <- as.character(slide[i])
       title.i <- title[i]
       if(is.null(boundary)){
-        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL)
+        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL, tabl=tabl)
       } else {
-        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i])
+        plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i], tabl=tabl)
       }
   }
   }
