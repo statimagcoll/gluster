@@ -138,9 +138,9 @@ plot.groupGluster <- function(x, marker=NULL, slide=NULL, component=2, diagnosti
       slide.i <- as.character(slide[i])
       title.i <- title[i]
       if(is.null(boundary)){
-        ps[[i]] <- plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL, tabl=tabl)
+        ps[[i]] <- plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = NULL, tabl=tabl, print = FALSE)
       } else {
-        ps[[i]] <- plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i], tabl=tabl)
+        ps[[i]] <- plotGroupGluster(x, marker=marker.i, slide=slide.i, diagnostic = FALSE, histogram = TRUE, title = title.i, boundary = boundary[i], tabl=tabl, print = FALSE)
       }
     }
     if(print){
