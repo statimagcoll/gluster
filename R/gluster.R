@@ -117,7 +117,7 @@ glusterX = function(x, constraints=NULL, subBatch=NULL, nn0=200, ...){
   post0 <- data.frame(comp1=rep(NA, n), comp2 = rep(NA, n))
   post0[ which(zeroInds),] = 0
   # return probabilities for posteriors
-  if(fit$convergence){
+  if(ifelse(is.na(fit$convergence), FALSE, fit$convergence)){
     post0[!naInds & !zeroInds,] <- fit$posterior
   } else {
     param.table = lapply(param.table, function(x){ x[c('alpha', 'beta'), ] = NA; x['lambda', c('comp1', 'comp2')]=NA ; x} )
