@@ -25,14 +25,23 @@ convCheck <- function(gluster.fit, out.all=FALSE, return.result=FALSE){
     if(out.all){
       reactable(conv.tab)
     } else{
+      if(any(is.na(conv.tab))){
+        na.ind <- which(is.na(conv.tab))
+        na.names <- expand.grid(dimnames(conv.tab))[na.ind,]
+        colnames(na.names) <- c("marker", "slide")
+        print("Convergence NA:")
+        print(na.names, row.names = FALSE)
+        conv.tab[na.ind] <- TRUE
+        conv.msg <- "All converged for other slides."} else {conv.msg <- "All converged."}
       if(!all(conv.tab)){
         uncov.ind <- which(!conv.tab)
         uncov.names <- expand.grid(dimnames(conv.tab))[uncov.ind,]
         colnames(uncov.names) <- c("marker", "slide")
+        print("Did not converge:")
         print(uncov.names, row.names = FALSE)
-      } else {print("All converged.")}
+      } else {print(conv.msg)}
     }
-  } else {print("Wrong input type :o")}
+  } else {print("Wrong input type!!")}
   if(return.result){return(conv.tab)}
 }
 
