@@ -4,7 +4,13 @@
 \alias{evaluateGroupGluster}
 \title{Compare binary classification result using Cohen's Kappa or Adjusted Rand Index}
 \usage{
-evaluateGroupGluster(..., standard, batch, method = c("cohen", "rand"))
+evaluateGroupGluster(
+  ...,
+  standard,
+  batch,
+  method = c("cohen", "rand"),
+  plot.type = c("boxplot", "scatter")
+)
 }
 \arguments{
 \item{...}{Matrices to compare to standard labels. Rows are cells, columns are markers.}
@@ -14,6 +20,8 @@ evaluateGroupGluster(..., standard, batch, method = c("cohen", "rand"))
 \item{batch}{Split kappa computation by this variable. Similar to slide_id.}
 
 \item{method}{"cohen" the default, calculates cohen's kappa; "rand" calculates adjusted rand index.}
+
+\item{plot.type}{"boxplot" the default; recommend "scatter" when number of slides is small.}
 }
 \description{
 This function can compare the agreement of classification result against a gold/silver standard.

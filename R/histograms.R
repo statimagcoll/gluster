@@ -145,6 +145,7 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=N
 #' @param standard A matrix indicating gold/silver standard positive cells.
 #' @param batch Split kappa computation by this variable. Similar to slide_id.
 #' @param method "cohen" the default, calculates cohen's kappa; "rand" calculates adjusted rand index.
+#' @param plot.type "boxplot" the default; recommend "scatter" when number of slides is small.
 #' @importFrom stats dgamma
 #' @importFrom ggplot2 aes ggplot ggtitle geom_histogram after_stat stat_function geom_vline unit annotation_custom geom_boxplot coord_flip ylab xlab
 #' @importFrom rlang UQ
