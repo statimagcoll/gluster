@@ -169,12 +169,14 @@ evaluateGroupGluster = function(..., standard, batch, method=c("cohen", "rand"),
     idx.df = lapply(x, function(xmat, standard, batch){
       result2 = as.data.frame(t(mapply(function(sxmat, sstandard){
         result = mapply(function(xv, yv){
+          xv <- as.matrix(xv)
+          yv <- as.matrix(yv)
           if(method=="cohen"){po=table(xv, yv)
           po = po/sum(po)
           pe=sum(rowSums(po) * colSums(po))
           po=sum(po[c(1,4)])
           (po-pe)/(1-pe)} else if (method=="rand"){
-            adj.rand.index((xv+1), (yv+1))
+            adj.rand.index((as.matrix(xv)+1), (as.matrix(yv)+1))
           }  }, xv=sxmat, yv=sstandard)
         #result$method = if(!is.null(rownames(result))) rownames(result) else
         return(result)
