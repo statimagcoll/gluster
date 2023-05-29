@@ -165,25 +165,25 @@ evaluateGroupGluster = function(..., standard, batch, method=c("cohen", "rand"),
   markers = colnames(standard)
 
 
-    # Compute kappa for each method, slide, and marker
-    idx.df = lapply(x, function(xmat, standard, batch){
-      result2 = as.data.frame(t(mapply(function(sxmat, sstandard){
-        result = mapply(function(xv, yv){
-          xv <- as.matrix(xv)
-          yv <- as.matrix(yv)
-          if(method=="cohen"){po=table(xv, yv)
-          po = po/sum(po)
-          pe=sum(rowSums(po) * colSums(po))
-          po=sum(po[c(1,4)])
-          (po-pe)/(1-pe)} else if (method=="rand"){
-            adj.rand.index((as.matrix(xv)+1), (as.matrix(yv)+1))
-          }  }, xv=sxmat, yv=sstandard)
-        #result$method = if(!is.null(rownames(result))) rownames(result) else
-        return(result)
-      }, sxmat=split(xmat, batch), sstandard=split(standard, batch) ) ))
-      result2$batch = rownames(result2)
-      result2
-    }, standard=standard, batch=batch)
+  # Compute kappa for each method, slide, and marker
+  idx.df = lapply(x, function(xmat, standard, batch){
+    result2 = as.data.frame(t(mapply(function(sxmat, sstandard){
+      result = mapply(function(xv, yv){
+        xv <- as.matrix(xv)
+        yv <- as.matrix(yv)
+        if(method=="cohen"){po=table(xv, yv)
+        po = po/sum(po)
+        pe=sum(rowSums(po) * colSums(po))
+        po=sum(po[c(1,4)])
+        (po-pe)/(1-pe)} else if (method=="rand"){
+          adj.rand.index(xv+1, yv+1)
+        }  }, xv=sxmat, yv=sstandard)
+      #result$method = if(!is.null(rownames(result))) rownames(result) else
+      return(result)
+    }, sxmat=split(xmat, batch), sstandard=split(standard, batch) ) ))
+    result2$batch = rownames(result2)
+    result2
+  }, standard=standard, batch=batch)
 
 
   method.names <- names(list(...))
@@ -193,20 +193,21 @@ evaluateGroupGluster = function(..., standard, batch, method=c("cohen", "rand"),
   idx.df = do.call(rbind,  idx.df)
   colnames(idx.df)[1:length(markers)] <- markers
   idx.plot <- melt(idx.df, id.vars = c("batch", "method"), variable.name = "marker",
-                           value.name = "idx.method")
+                   value.name = "idx.method")
 
-  ttl <- ifelse(method=="cohen", "Cohen's Kappa \ncompared to Silver Standard", "Adjusted Rand Index \ncomparedto Silver Standard")
+  ttl <- ifelse(method=="cohen", "Cohen's Kappa \ncompared to Silver Standard", "Adjusted Rand Index \ncompared to Silver Standard")
   p <- ggplot() + theme_ipsum(plot_title_size = 10,base_size = 8)
   if(plot.type=="scatter"){
-    p <- p + coord_flip()+ geom_point(data=idx.plot, aes(x=marker, y=idx.method, fill=method), alpha=0.3)+
+    p <- p + coord_flip()+ geom_jitter(data=idx.plot, aes(x=marker, y=idx.method, color=method), alpha=0.3)+
       ggtitle(ttl)+xlab("Marker")+ylab(method)
   } else {
-    p <- p + coord_flip()+ geom_boxplot(data=idx.plot, aes(x=marker, y=idx.method, fill=method), width=0.7, alpha=0.3)+
+    p <- p + coord_flip()+ geom_boxplot(data=idx.plot, aes(x=marker, y=idx.method, color=method), width=0.7, alpha=0.3)+
       ggtitle(ttl)+xlab("Marker")+ylab(method)
   }
-    print(p)
+  print(p)
   return(idx.df)
 }
+
 
 #' Get mode from parameters
 #'
