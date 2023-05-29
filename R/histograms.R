@@ -156,7 +156,7 @@ hist_sr_constrast <- function(fit1, fit2, marker=1, slide=1, subBatch=1, title=N
 #' @export
 #' @details Plot a histogram of a gluster model. Plots one model.
 #' Takes a gluster object and plots the histogram with the fitted model and parameter values.
-evaluateGroupGluster = function(..., standard, batch, method=c("cohen", "rand")){
+evaluateGroupGluster = function(..., standard, batch, method=c("cohen", "rand"), plot.type=c("boxplot", "scatter")){
   standard = as.data.frame(standard)
   # cohen's kappa
   x = lapply(list(...), as.data.frame)
@@ -193,9 +193,15 @@ evaluateGroupGluster = function(..., standard, batch, method=c("cohen", "rand"))
                            value.name = "idx.method")
 
   ttl <- ifelse(method=="cohen", "Cohen's Kappa \ncompared to Silver Standard", "Adjusted Rand Index \ncomparedto Silver Standard")
-  p <- ggplot() + theme_ipsum(plot_title_size = 10,base_size = 8)  + coord_flip()+
-     geom_boxplot(data=idx.plot, aes(x=marker, y=idx.method, fill=method), width=0.7, alpha=0.3)+ggtitle(ttl)+xlab("Marker")+ylab(method)
-  print(p)
+  p <- ggplot() + theme_ipsum(plot_title_size = 10,base_size = 8)
+  if(plot.type=="scatter"){
+    p <- p + coord_flip()+ geom_point(data=idx.plot, aes(x=marker, y=idx.method, fill=method), alpha=0.3)+
+      ggtitle(ttl)+xlab("Marker")+ylab(method)
+  } else {
+    p <- p + coord_flip()+ geom_boxplot(data=idx.plot, aes(x=marker, y=idx.method, fill=method), width=0.7, alpha=0.3)+
+      ggtitle(ttl)+xlab("Marker")+ylab(method)
+  }
+    print(p)
   return(idx.df)
 }
 
